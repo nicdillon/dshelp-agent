@@ -7,7 +7,8 @@ An AI-powered chatbot for Slack powered by the [AI SDK by Vercel](https://sdk.ve
 ## Features
 
 - Integrates with [Slack's API](https://api.slack.com) for easy Slack communication
-- Use any LLM with the AI SDK ([easily switch between providers](https://sdk.vercel.ai/providers/ai-sdk-providers))
+- Uses [Vercel AI Gateway](https://vercel.com/ai-gateway) for unified access to multiple AI providers (OpenAI, Anthropic, Google, and more)
+- Easily switch between AI models and providers with a simple configuration change
 - Works both with app mentions and as an assistant in direct messages
 - Maintains conversation context within both threads and direct messages
 - Built-in tools for enhanced capabilities:
@@ -19,7 +20,7 @@ An AI-powered chatbot for Slack powered by the [AI SDK by Vercel](https://sdk.ve
 
 - [Node.js](https://nodejs.org/) 18+ installed
 - Slack workspace with admin privileges
-- [OpenAI API key](https://platform.openai.com/api-keys)
+- [Vercel AI Gateway API key](https://vercel.com/docs/ai-gateway/getting-started) (optional for local development, not required when deployed to Vercel)
 - [Exa API key](https://exa.ai) (for web search functionality)
 - A server or hosting platform (e.g., [Vercel](https://vercel.com)) to deploy the bot
 
@@ -79,14 +80,18 @@ Create a `.env` file in the root of your project with the following:
 SLACK_BOT_TOKEN=xoxb-your-bot-token
 SLACK_SIGNING_SECRET=your-signing-secret
 
-# OpenAI Credentials
-OPENAI_API_KEY=your-openai-api-key
+# Vercel AI Gateway
+# Get this from your Vercel dashboard (navigate to AI Gateway > API Keys)
+# Note: When deployed to Vercel, OIDC authentication is used automatically and this key is not required
+AI_GATEWAY_API_KEY=your-ai-gateway-api-key
 
 # Exa API Key (for web search functionality)
 EXA_API_KEY=your-exa-api-key
 ```
 
 Replace the placeholder values with your actual tokens.
+
+**Note:** The AI Gateway gives you access to multiple AI providers (OpenAI, Anthropic, Google, etc.) through a single API key. When deployed to Vercel, authentication happens automatically via OIDC and no API key is needed.
 
 ## Local Development
 
@@ -121,7 +126,7 @@ Make sure to modify the [subscription URL](./README.md/#enable-slack-events) to 
 
    - `SLACK_BOT_TOKEN`
    - `SLACK_SIGNING_SECRET`
-   - `OPENAI_API_KEY`
+   - `AI_GATEWAY_API_KEY` (optional - OIDC authentication is used automatically when deployed to Vercel)
    - `EXA_API_KEY`
 
 4. After deployment, Vercel will provide you with a production URL
@@ -163,9 +168,29 @@ The chatbot is built with an extensible architecture using the [AI SDK's tool sy
 - Custom API integrations
 - Company documentation search
 
-To add a new tool, extend the tools object in the `lib/ai.ts` file following the existing pattern.
+To add a new tool, extend the tools object in the `lib/generate-response.ts` file following the existing pattern.
 
-You can also disable any of the existing tools by removing the tool in the `lib/ai.ts` file.
+You can also disable any of the existing tools by removing the tool in the `lib/generate-response.ts` file.
+
+### Switching AI Models
+
+Thanks to Vercel AI Gateway, you can easily switch between different AI providers and models. Simply update the model string in `lib/generate-response.ts`:
+
+```typescript
+// OpenAI GPT-4o (default)
+model: "openai/gpt-4o"
+
+// Anthropic Claude
+model: "anthropic/claude-3-5-sonnet-20241022"
+
+// Google Gemini
+model: "google/gemini-1.5-pro"
+
+// OpenAI GPT-4o-mini (faster, cheaper)
+model: "openai/gpt-4o-mini"
+```
+
+No other code changes or additional API keys are required!
 
 ## License
 

@@ -11,10 +11,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@ai-sdk/openai": "^1.1.14",
+    "@ai-sdk/gateway": "^3.0.10",
     "@slack/web-api": "^7.9.3",
     "@vercel/functions": "^2.0.0",
-    "ai": "^4.1.46",
+    "ai": "^6.0.19",
     "exa-js": "^1.4.10",
     "zod": "^3.24.2"
   },

@@ -1,24 +1,27 @@
-import { openai } from "@ai-sdk/openai";
-import { CoreMessage, generateText, tool } from "ai";
+import { ModelMessage, generateText, tool } from "ai";
+import { createGateway } from "@ai-sdk/gateway";
 import { z } from "zod";
 import { exa } from "./utils";
 
+const gateway = createGateway({
+  apiKey: process.env.AI_GATEWAY_API_KEY,
+});
+
 export const generateResponse = async (
-  messages: CoreMessage[],
+  messages: ModelMessage[],
   updateStatus?: (status: string) => void,
 ) => {
   const { text } = await generateText({
-    model: openai("gpt-4o"),
+    model: gateway("openai/gpt-4o"),
     system: `You are a Slack bot assistant Keep your responses concise and to the point.
     - Do not tag users.
     - Current date is: ${new Date().toISOString().split("T")[0]}
     - Make sure to ALWAYS include sources in your final response if you use web search. Put sources inline if possible.`,
     messages,
-    maxSteps: 10,
     tools: {
       getWeather: tool({
         description: "Get the current weather at a location",
-        parameters: z.object({
+        inputSchema: z.object({
           latitude: z.number(),
           longitude: z.number(),
           city: z.string(),
@@ -41,7 +44,7 @@ export const generateResponse = async (
       }),
       searchWeb: tool({
         description: "Use this to search the web for information",
-        parameters: z.object({
+        inputSchema: z.object({
           query: z.string(),
           specificDomain: z
             .string()
