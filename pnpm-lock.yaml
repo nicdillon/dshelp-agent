@@ -10,7 +10,7 @@ importers:
     dependencies:
       '@ai-sdk/gateway':
         specifier: ^3.0.10
-        version: 3.0.10(zod@3.24.2)
+        version: 3.0.10(zod@4.3.5)
       '@slack/web-api':
         specifier: ^7.9.3
         version: 7.9.3
@@ -19,13 +19,13 @@ importers:
         version: 2.0.0
       ai:
         specifier: ^6.0.19
-        version: 6.0.19(zod@3.24.2)
+        version: 6.0.19(zod@4.3.5)
       exa-js:
         specifier: ^1.4.10
         version: 1.4.10
       zod:
-        specifier: ^3.24.2
-        version: 3.24.2
+        specifier: ^4.3.5
+        version: 4.3.5
     devDependencies:
       '@types/node':
         specifier: ^20.11.17
@@ -265,24 +265,24 @@ packages:
   whatwg-url@5.0.0:
     resolution: {integrity: sha512-saE57nupxk6v3HY35+jzBwYa0rKSy0XR8JSxZPwgLr7ys0IBzhGviA1/TUGJLmSVqs8pb9AnvICXEuOHLprYTw==}
 
-  zod@3.24.2:
-    resolution: {integrity: sha512-lY7CDW43ECgW9u1TcT3IoXHflywfVqDYze4waEz812jR/bZ8FHDsl7pFQoSZTz5N+2NqRXs8GBwnAwo3ZNxqhQ==}
+  zod@4.3.5:
+    resolution: {integrity: sha512-k7Nwx6vuWx1IJ9Bjuf4Zt1PEllcwe7cls3VNzm4CQ1/hgtFUK2bRNG3rvnpPUhFjmqJKAKtjV576KnUkHocg/g==}
 
 snapshots:
 
-  '@ai-sdk/gateway@3.0.10(zod@3.24.2)':
+  '@ai-sdk/gateway@3.0.10(zod@4.3.5)':
     dependencies:
       '@ai-sdk/provider': 3.0.2
-      '@ai-sdk/provider-utils': 4.0.4(zod@3.24.2)
+      '@ai-sdk/provider-utils': 4.0.4(zod@4.3.5)
       '@vercel/oidc': 3.1.0
-      zod: 3.24.2
+      zod: 4.3.5
 
-  '@ai-sdk/provider-utils@4.0.4(zod@3.24.2)':
+  '@ai-sdk/provider-utils@4.0.4(zod@4.3.5)':
     dependencies:
       '@ai-sdk/provider': 3.0.2
       '@standard-schema/spec': 1.1.0
       eventsource-parser: 3.0.6
-      zod: 3.24.2
+      zod: 4.3.5
 
   '@ai-sdk/provider@3.0.2':
     dependencies:
@@ -325,13 +325,13 @@ snapshots:
 
   '@vercel/oidc@3.1.0': {}
 
-  ai@6.0.19(zod@3.24.2):
+  ai@6.0.19(zod@4.3.5):
     dependencies:
-      '@ai-sdk/gateway': 3.0.10(zod@3.24.2)
+      '@ai-sdk/gateway': 3.0.10(zod@4.3.5)
       '@ai-sdk/provider': 3.0.2
-      '@ai-sdk/provider-utils': 4.0.4(zod@3.24.2)
+      '@ai-sdk/provider-utils': 4.0.4(zod@4.3.5)
       '@opentelemetry/api': 1.9.0
-      zod: 3.24.2
+      zod: 4.3.5
 
   asynckit@0.4.0: {}
 
@@ -488,4 +488,4 @@ snapshots:
       tr46: 0.0.3
       webidl-conversions: 3.0.1
 
-  zod@3.24.2: {}
+  zod@4.3.5: {}
