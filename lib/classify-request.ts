@@ -3,10 +3,11 @@ import { createGateway } from "@ai-sdk/gateway";
 import { z } from "zod";
 
 // Initialize gateway - when deployed to Vercel, OIDC is used automatically
+const gatewayApiKey = process.env.AI_GATEWAY_API_KEY?.trim();
 const gateway = createGateway(
-  process.env.AI_GATEWAY_API_KEY
-    ? { apiKey: process.env.AI_GATEWAY_API_KEY }
-    : {}
+  gatewayApiKey && gatewayApiKey.length > 0
+    ? { apiKey: gatewayApiKey }
+    : { apiKey: undefined }
 );
 
 export const classifyRequest = async (messages: ModelMessage[]) => {
