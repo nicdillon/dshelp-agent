@@ -1,4 +1,5 @@
-import type { SlackEvent } from "@slack/web-api";
+// Slack event types
+type SlackEvent = any;
 import {
   assistantThreadMessage,
   handleNewAssistantMessage,

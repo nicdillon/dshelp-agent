@@ -72,6 +72,16 @@ After providing your initial response to in-scope requests, you can offer to cre
           priority,
           elevatedPriorityContext,
           issueCategory,
+        }: {
+          customer: string;
+          customerName: string;
+          customerSegment?: "Enterprise" | "Pro" | "Hobby" | "Unknown";
+          teamId: string;
+          notionLink?: string;
+          projectId?: string;
+          priority?: "🔴 SEV 1/Urgent" | "🟠 SEV 2/High" | "🟡 SEV 3/Non-Urgent";
+          elevatedPriorityContext?: string;
+          issueCategory: "technical-troubleshooting" | "best-practices" | "customer-issue" | "ai-sdk-support";
         }) => {
           updateStatus?.("is posting ticket to DS team channel...");
 
@@ -125,7 +135,7 @@ After providing your initial response to in-scope requests, you can offer to cre
           longitude: z.number(),
           city: z.string(),
         }),
-        execute: async ({ latitude, longitude, city }) => {
+        execute: async ({ latitude, longitude, city }: { latitude: number; longitude: number; city: string }) => {
           updateStatus?.(`is getting weather for ${city}...`);
 
           const response = await fetch(
@@ -152,7 +162,7 @@ After providing your initial response to in-scope requests, you can offer to cre
               "a domain to search if the user specifies e.g. bbc.com. Should be only the domain name without the protocol",
             ),
         }),
-        execute: async ({ query, specificDomain }) => {
+        execute: async ({ query, specificDomain }: { query: string; specificDomain: string | null }) => {
           updateStatus?.(`is searching the web for ${query}...`);
           const { results } = await exa.searchAndContents(query, {
             livecrawl: "always",

@@ -1,7 +1,6 @@
-import type {
-  AssistantThreadStartedEvent,
-  GenericMessageEvent,
-} from "@slack/web-api";
+// Slack event types
+type AssistantThreadStartedEvent = any;
+type GenericMessageEvent = any;
 import { client, getThread, updateStatusUtil } from "./slack-utils";
 import { generateResponse } from "./generate-response";
 import { classifyRequest } from "./classify-request";
