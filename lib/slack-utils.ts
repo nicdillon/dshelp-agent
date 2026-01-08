@@ -4,15 +4,18 @@ import crypto from 'crypto'
 
 // Validate and sanitize environment variables
 const slackBotToken = process.env.SLACK_BOT_TOKEN?.trim();
-const signingSecret = process.env.SLACK_SIGNING_SECRET?.trim();
+const signingSecretRaw = process.env.SLACK_SIGNING_SECRET?.trim();
 
 if (!slackBotToken) {
   throw new Error('SLACK_BOT_TOKEN environment variable is not set or is empty');
 }
 
-if (!signingSecret) {
+if (!signingSecretRaw) {
   throw new Error('SLACK_SIGNING_SECRET environment variable is not set or is empty');
 }
+
+// Type-safe after validation
+const signingSecret: string = signingSecretRaw;
 
 export const client = new WebClient(slackBotToken);
 
