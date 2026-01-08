@@ -2,9 +2,19 @@ import { WebClient } from '@slack/web-api';
 import { ModelMessage } from 'ai'
 import crypto from 'crypto'
 
-const signingSecret = process.env.SLACK_SIGNING_SECRET!
+// Validate and sanitize environment variables
+const slackBotToken = process.env.SLACK_BOT_TOKEN?.trim();
+const signingSecret = process.env.SLACK_SIGNING_SECRET?.trim();
 
-export const client = new WebClient(process.env.SLACK_BOT_TOKEN);
+if (!slackBotToken) {
+  throw new Error('SLACK_BOT_TOKEN environment variable is not set or is empty');
+}
+
+if (!signingSecret) {
+  throw new Error('SLACK_SIGNING_SECRET environment variable is not set or is empty');
+}
+
+export const client = new WebClient(slackBotToken);
 
 // See https://api.slack.com/authentication/verifying-requests-from-slack
 export async function isValidSlackRequest({

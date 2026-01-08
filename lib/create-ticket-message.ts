@@ -15,7 +15,7 @@ interface TicketDetails {
 }
 
 export const postTicketCreationMessage = async (details: TicketDetails) => {
-  const ticketChannelId = process.env.SLACK_TICKET_CHANNEL_ID;
+  const ticketChannelId = process.env.SLACK_TICKET_CHANNEL_ID?.trim();
 
   if (!ticketChannelId) {
     throw new Error(
