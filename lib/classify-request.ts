@@ -46,7 +46,7 @@ Analyze the user's request and classify it.`,
         "out-of-scope"
       ]).describe("The category that best matches the request"),
       reasoning: z.string().describe("Brief explanation of why this classification was chosen"),
-      suggestedTeam: z.string().optional().describe("If out of scope, which team should handle this (e.g., 'Sales team', 'Billing team', 'General Support')"),
+      suggestedTeam: z.string().describe("If out of scope, which team should handle this (e.g., 'Sales team', 'Billing team', 'General Support'). If in scope, return 'DS team'"),
     }),
     messages,
   });

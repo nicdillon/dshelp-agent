@@ -1,6 +1,6 @@
 interface RoutingResponseOptions {
   category: string;
-  suggestedTeam?: string;
+  suggestedTeam: string;
   reasoning: string;
 }
 
