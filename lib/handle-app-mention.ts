@@ -1,6 +1,8 @@
 import { AppMentionEvent } from "@slack/web-api";
 import { client, getThread } from "./slack-utils";
 import { generateResponse } from "./generate-response";
+import { classifyRequest } from "./classify-request";
+import { generateRoutingResponse } from "./generate-routing-response";
 
 const updateStatusUtil = async (
   initialStatus: string,
@@ -36,17 +38,39 @@ export async function handleNewAppMention(
   }
 
   const { thread_ts, channel } = event;
-  const updateMessage = await updateStatusUtil("is thinking...", event);
+  const updateMessage = await updateStatusUtil("is analyzing your request...", event);
 
+  let messages;
   if (thread_ts) {
-    const messages = await getThread(channel, thread_ts, botUserId);
-    const result = await generateResponse(messages, updateMessage);
-    await updateMessage(result);
+    messages = await getThread(channel, thread_ts, botUserId);
   } else {
-    const result = await generateResponse(
-      [{ role: "user", content: event.text }],
-      updateMessage,
-    );
-    await updateMessage(result);
+    messages = [{ role: "user" as const, content: event.text }];
   }
+
+  // Classify the request to check if it's in DS scope
+  const classification = await classifyRequest(messages);
+
+  console.log(`App mention classification:`, JSON.stringify(classification));
+
+  let result: string;
+
+  if (!classification.isInScope) {
+    // Out of scope - provide routing guidance
+    result = generateRoutingResponse({
+      category: classification.category,
+      suggestedTeam: classification.suggestedTeam,
+      reasoning: classification.reasoning,
+    });
+  } else {
+    // In scope - generate full response
+    await updateMessage("is working on your request...");
+
+    // Build Slack thread URL
+    const threadTs = thread_ts ?? event.ts;
+    const slackThreadUrl = `https://slack.com/app_redirect?channel=${channel}&thread_ts=${threadTs}`;
+
+    result = await generateResponse(messages, updateMessage, slackThreadUrl);
+  }
+
+  await updateMessage(result);
 }

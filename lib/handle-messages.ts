@@ -4,6 +4,8 @@ import type {
 } from "@slack/web-api";
 import { client, getThread, updateStatusUtil } from "./slack-utils";
 import { generateResponse } from "./generate-response";
+import { classifyRequest } from "./classify-request";
+import { generateRoutingResponse } from "./generate-routing-response";
 
 export async function assistantThreadMessage(
   event: AssistantThreadStartedEvent,
@@ -15,7 +17,7 @@ export async function assistantThreadMessage(
   await client.chat.postMessage({
     channel: channel_id,
     thread_ts: thread_ts,
-    text: "Hello, I'm an AI assistant built with the AI SDK by Vercel!",
+    text: "Hello! I'm the Developer Success AI assistant. I can help with Vercel platform issues, Next.js development, AI SDK implementation, and architecture guidance. How can I assist you today?",
   });
 
   await client.assistant.threads.setSuggestedPrompts({
@@ -23,12 +25,16 @@ export async function assistantThreadMessage(
     thread_ts: thread_ts,
     prompts: [
       {
-        title: "Get the weather",
-        message: "What is the current weather in London?",
+        title: "Debug a deployment issue",
+        message: "I'm getting an error when deploying my Next.js app to Vercel",
       },
       {
-        title: "Get the news",
-        message: "What is the latest Premier League news from the BBC?",
+        title: "AI SDK implementation",
+        message: "How do I implement streaming with the AI SDK?",
+      },
+      {
+        title: "Architecture guidance",
+        message: "What's the best way to structure my Next.js app for production?",
       },
     ],
   });
@@ -48,10 +54,33 @@ export async function handleNewAssistantMessage(
 
   const { thread_ts, channel } = event;
   const updateStatus = updateStatusUtil(channel, thread_ts);
-  await updateStatus("is thinking...");
+  await updateStatus("is analyzing your request...");
 
   const messages = await getThread(channel, thread_ts, botUserId);
-  const result = await generateResponse(messages, updateStatus);
+
+  // Classify the request to check if it's in DS scope
+  const classification = await classifyRequest(messages);
+
+  console.log(`Request classification:`, JSON.stringify(classification));
+
+  let result: string;
+
+  if (!classification.isInScope) {
+    // Out of scope - provide routing guidance
+    result = generateRoutingResponse({
+      category: classification.category,
+      suggestedTeam: classification.suggestedTeam,
+      reasoning: classification.reasoning,
+    });
+  } else {
+    // In scope - generate full response
+    await updateStatus("is working on your request...");
+
+    // Build Slack thread URL
+    const slackThreadUrl = `https://slack.com/app_redirect?channel=${channel}&thread_ts=${thread_ts}`;
+
+    result = await generateResponse(messages, updateStatus, slackThreadUrl);
+  }
 
   await client.chat.postMessage({
     channel: channel,

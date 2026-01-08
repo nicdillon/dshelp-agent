@@ -1,8 +1,8 @@
-# AI SDK Slackbot
+# DS Help Agent
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fnicoalbanese%2Fai-sdk-slackbot&env=SLACK_BOT_TOKEN,SLACK_SIGNING_SECRET,OPENAI_API_KEY,EXA_API_KEY&envDescription=API%20keys%20needed%20for%20application&envLink=https%3A%2F%2Fgithub.com%2Fnicoalbanese%2Fai-sdk-slackbot%3Ftab%3Dreadme-ov-file%234-set-environment-variables&project-name=ai-sdk-slackbot)
 
-An AI-powered chatbot for Slack powered by the [AI SDK by Vercel](https://sdk.vercel.ai/docs).
+An AI-powered Developer Success agent for Slack, built with the [AI SDK by Vercel](https://sdk.vercel.ai/docs). Intelligently routes support requests, provides technical guidance, and integrates with Linear for ticket management.
 
 ## Features
 
@@ -11,9 +11,12 @@ An AI-powered chatbot for Slack powered by the [AI SDK by Vercel](https://sdk.ve
 - Easily switch between AI models and providers with a simple configuration change
 - Works both with app mentions and as an assistant in direct messages
 - Maintains conversation context within both threads and direct messages
+- **Smart request routing**: Automatically classifies requests to ensure they're in scope for Developer Success team
+- **Linear ticket creation**: After responding to in-scope requests, the agent can create Linear tickets with full context for tracking and follow-up
 - Built-in tools for enhanced capabilities:
   - Real-time weather lookup
   - Web search (powered by [Exa](https://exa.ai))
+  - Linear ticket creation with customer context
 - Easily extensible architecture to add custom tools (e.g., knowledge search)
 
 ## Prerequisites
@@ -22,6 +25,8 @@ An AI-powered chatbot for Slack powered by the [AI SDK by Vercel](https://sdk.ve
 - Slack workspace with admin privileges
 - [Vercel AI Gateway API key](https://vercel.com/docs/ai-gateway/getting-started) (optional for local development, not required when deployed to Vercel)
 - [Exa API key](https://exa.ai) (for web search functionality)
+- [Linear Slack bot](https://linear.app/integrations/slack) installed in your workspace (for ticket creation functionality)
+- A dedicated Slack channel for DS support tickets
 - A server or hosting platform (e.g., [Vercel](https://vercel.com)) to deploy the bot
 
 ## Setup
@@ -71,7 +76,15 @@ pnpm install
 
 You may need to refresh Slack with CMD+R or CTRL+R to pick up certain changes, such as enabling the chat tab
 
-### 4. Set Environment Variables
+### 4. Set Up Linear Slack Integration
+
+1. Install the [Linear Slack app](https://linear.app/integrations/slack) in your workspace
+2. Create a dedicated Slack channel for DS support tickets (e.g., `#ds-support-tickets`)
+3. Invite the Linear bot to this channel
+4. Copy the channel ID (right-click channel → View channel details → copy the ID from the bottom)
+5. You'll use this channel ID in your environment variables
+
+### 5. Set Environment Variables
 
 Create a `.env` file in the root of your project with the following:
 
@@ -87,6 +100,11 @@ AI_GATEWAY_API_KEY=your-ai-gateway-api-key
 
 # Exa API Key (for web search functionality)
 EXA_API_KEY=your-exa-api-key
+
+# Ticket Channel (for posting DS support tickets)
+# This is the Slack channel ID where ticket requests will be posted
+# The Linear Slack bot should be active in this channel to create tickets
+SLACK_TICKET_CHANNEL_ID=your-channel-id
 ```
 
 Replace the placeholder values with your actual tokens.
@@ -128,6 +146,7 @@ Make sure to modify the [subscription URL](./README.md/#enable-slack-events) to 
    - `SLACK_SIGNING_SECRET`
    - `AI_GATEWAY_API_KEY` (optional - OIDC authentication is used automatically when deployed to Vercel)
    - `EXA_API_KEY`
+   - `SLACK_TICKET_CHANNEL_ID` (the channel where DS tickets should be posted)
 
 4. After deployment, Vercel will provide you with a production URL
 
@@ -158,6 +177,26 @@ The bot maintains context within both threads and direct messages, so it can fol
 2. **Web Search**: The bot can search the web for up-to-date information using [Exa](https://exa.ai).
    - Example: "Search for the latest news about AI technology"
    - You can also specify a domain: "Search for the latest sports news on bbc.com"
+
+3. **Linear Ticket Creation via Slack**: After responding to in-scope Developer Success requests, the bot posts a formatted message to your DS tickets channel matching your Linear Ask form.
+   - The bot extracts and includes all Linear Ask fields:
+     - Customer & Customer Name
+     - Customer Segment (Enterprise/Pro/Hobby)
+     - Team ID (format: `team_XXXXXXXXXXXXXXXXXXXXXXXX`)
+     - Project ID (format: `prj_XXXXXXXXXXXXXXXXXXXXXXXX`)
+     - Priority (SEV 1/Urgent, SEV 2/High, SEV 3/Non-Urgent)
+     - Elevated Priority Context (if applicable)
+     - Full request description with Slack thread link
+   - Simply ask: "Can you create a ticket for this?" or the bot may offer to create one after providing its response
+   - DS team members can then use Linear's Slack bot in that channel to create tickets with all the context pre-filled
+   - The bot notes that pre-debugging steps have been considered
+
+### Request Classification
+
+The bot includes intelligent request routing to ensure it only handles requests within the Developer Success team's scope:
+
+- **In Scope**: Technical troubleshooting, best practices, Vercel/Next.js issues, AI SDK support
+- **Out of Scope**: Billing, contracts, sales inquiries → Bot politely redirects to appropriate team
 
 ### Extending with New Tools
 
