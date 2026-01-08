@@ -5,12 +5,13 @@ import { exa } from "./utils";
 import { postTicketCreationMessage } from "./create-ticket-message";
 
 // Initialize gateway - when deployed to Vercel, OIDC is used automatically
-// Only pass apiKey if it's explicitly set and not empty for local development
+// IMPORTANT: Don't pass apiKey property at all to enable OIDC on Vercel
+// If an API key is present, it will always be used instead of OIDC
 const gatewayApiKey = process.env.AI_GATEWAY_API_KEY?.trim();
 const gateway = createGateway(
   gatewayApiKey && gatewayApiKey.length > 0
     ? { apiKey: gatewayApiKey }
-    : { apiKey: undefined }
+    : {} // Empty object allows OIDC to work on Vercel
 );
 
 export const generateResponse = async (
