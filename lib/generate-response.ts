@@ -4,9 +4,13 @@ import { z } from "zod";
 import { exa } from "./utils";
 import { postTicketCreationMessage } from "./create-ticket-message";
 
-const gateway = createGateway({
-  apiKey: process.env.AI_GATEWAY_API_KEY,
-});
+// Initialize gateway - when deployed to Vercel, OIDC is used automatically
+// Only pass apiKey if it's explicitly set for local development
+const gateway = createGateway(
+  process.env.AI_GATEWAY_API_KEY
+    ? { apiKey: process.env.AI_GATEWAY_API_KEY }
+    : {}
+);
 
 export const generateResponse = async (
   messages: ModelMessage[],
