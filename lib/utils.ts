@@ -1,3 +1,4 @@
 import Exa from "exa-js";
 
-export const exa = new Exa(process.env.EXA_API_KEY);
+// Initialize Exa client only if API key is available
+export const exa = process.env.EXA_API_KEY ? new Exa(process.env.EXA_API_KEY) : null;

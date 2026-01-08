@@ -164,6 +164,14 @@ After providing your initial response to in-scope requests, you can offer to cre
         }),
         execute: async ({ query, specificDomain }: { query: string; specificDomain: string | null }) => {
           updateStatus?.(`is searching the web for ${query}...`);
+
+          if (!exa) {
+            return {
+              error: "Web search is not available. EXA_API_KEY is not configured.",
+              results: [],
+            };
+          }
+
           const { results } = await exa.searchAndContents(query, {
             livecrawl: "always",
             numResults: 3,
