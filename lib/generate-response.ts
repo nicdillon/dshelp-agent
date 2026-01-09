@@ -63,10 +63,12 @@ After providing your initial response to in-scope requests, you can offer to cre
           elevatedPriorityContext: z.string().optional().describe("If priority is SEV 1 or SEV 2, provide context explaining why it's urgent (e.g., production down, customer escalation)"),
           issueCategory: z.enum([
             "technical-troubleshooting",
-            "best-practices",
-            "customer-issue",
+            "onboarding-enablement",
+            "performance-optimization",
+            "usage-cost-guidance",
+            "product-feature-guidance",
             "ai-sdk-support"
-          ]).describe("Category of the issue for internal tracking"),
+          ]).describe("Category of the issue for internal tracking (only in-scope DS categories)"),
         }),
         execute: async ({
           customer,
@@ -87,7 +89,7 @@ After providing your initial response to in-scope requests, you can offer to cre
           projectId?: string;
           priority?: "🔴 SEV 1/Urgent" | "🟠 SEV 2/High" | "🟡 SEV 3/Non-Urgent";
           elevatedPriorityContext?: string;
-          issueCategory: "technical-troubleshooting" | "best-practices" | "customer-issue" | "ai-sdk-support";
+          issueCategory: "technical-troubleshooting" | "onboarding-enablement" | "performance-optimization" | "usage-cost-guidance" | "product-feature-guidance" | "ai-sdk-support";
         }) => {
           updateStatus?.("is posting ticket to DS team channel...");
 
