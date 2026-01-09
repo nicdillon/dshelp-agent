@@ -55,7 +55,7 @@ Your role is NOT to solve technical problems directly, but to:
 1. **Acknowledge the request** - Show you understand what they need
 2. **Confirm DS scope** - Briefly explain how DS can help with this type of issue
 3. **Set expectations** - Mention that DS will investigate/provide guidance (not that YOU will solve it)
-4. **Offer ticket creation** - Proactively offer to create a DS support ticket using the createTicket tool
+4. **Create the ticket** - Use the createTicket tool to create a DS support ticket for tracking. Do this automatically - don't ask for permission.
 
 ## Important Guidelines:
 - Do NOT provide technical solutions, code examples, or step-by-step troubleshooting
@@ -74,11 +74,11 @@ When offering to create a ticket, you need to extract:
 - Customer segment if mentioned (Enterprise, Pro, Hobby)
 - Urgency and impact to determine priority (production issues = higher priority)
 
-After acknowledging their request and explaining how DS can help, ALWAYS offer to create a ticket by using the createTicket tool. Make this offer clear and inviting.`,
+After acknowledging their request and explaining how DS can help, ALWAYS create a ticket automatically by using the createTicket tool. Do not ask for permission - just create it and let them know it's been created.`,
     messages,
     tools: {
       createTicket: tool({
-        description: "Post a DS support ticket request to the Linear channel. Use this tool to create a ticket after acknowledging the request and explaining how DS can help. ALWAYS offer to create a ticket for in-scope requests. Extract as much customer context as possible from the conversation.",
+        description: "Post a DS support ticket request to the Linear channel. Use this tool to AUTOMATICALLY create a ticket after acknowledging the request and explaining how DS can help. ALWAYS create a ticket for in-scope requests - do not ask for permission. Extract as much customer context as possible from the conversation and generate a concise summary.",
         inputSchema: z.object({
           customer: z.string().describe("Customer identifier or email of the person requesting support"),
           customerName: z.string().describe("Customer's company/organization name"),
@@ -96,6 +96,7 @@ After acknowledging their request and explaining how DS can help, ALWAYS offer t
             "product-feature-guidance",
             "ai-sdk-support"
           ]).describe("Category of the issue for internal tracking (only in-scope DS categories)"),
+          issueSummary: z.string().describe("A concise 2-4 sentence summary of the issue/request from the conversation. Focus on the problem, impact, and what the customer needs help with. Do NOT copy the entire conversation - just summarize the key points."),
         }),
         execute: async ({
           customer,
@@ -107,6 +108,7 @@ After acknowledging their request and explaining how DS can help, ALWAYS offer t
           priority,
           elevatedPriorityContext,
           issueCategory,
+          issueSummary,
         }: {
           customer: string;
           customerName: string;
@@ -117,22 +119,14 @@ After acknowledging their request and explaining how DS can help, ALWAYS offer t
           priority?: "🔴 SEV 1/Urgent" | "🟠 SEV 2/High" | "🟡 SEV 3/Non-Urgent";
           elevatedPriorityContext?: string;
           issueCategory: "technical-troubleshooting" | "onboarding-enablement" | "performance-optimization" | "usage-cost-guidance" | "product-feature-guidance" | "ai-sdk-support";
+          issueSummary: string;
         }) => {
           updateStatus?.("is posting ticket to DS team channel...");
 
-          // Get the full conversation context for the request
-          const userMessages = messages.filter(m => m.role === "user");
-          const fullRequest = userMessages
-            .map(m =>
-              typeof m.content === "string"
-                ? m.content
-                : JSON.stringify(m.content)
-            )
-            .join("\n\n");
-
+          // Use the AI-generated summary instead of copying all messages
           const requestWithThread = slackThreadUrl
-            ? `${fullRequest}\n\n_Slack Thread:_ ${slackThreadUrl}`
-            : fullRequest;
+            ? `${issueSummary}\n\n_Slack Thread:_ ${slackThreadUrl}`
+            : issueSummary;
 
           try {
             const result = await postTicketCreationMessage({
