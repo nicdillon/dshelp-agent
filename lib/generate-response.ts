@@ -17,6 +17,7 @@ export const generateResponse = async (
   messages: ModelMessage[],
   updateStatus?: (status: string) => void,
   slackThreadUrl?: string,
+  channelHistory?: string,
 ) => {
   const { text } = await generateText({
     model: gateway("openai/gpt-4o"),
@@ -74,9 +75,65 @@ When offering to create a ticket, you need to extract:
 - Customer segment if mentioned (Enterprise, Pro, Hobby)
 - Urgency and impact to determine priority (production issues = higher priority)
 
+## Channel History Context:
+${channelHistory ? `You have access to recent channel history to help gather context for ticket creation. Use the searchChannelHistory tool to look for:
+- Team IDs and Project IDs that may have been mentioned earlier in the conversation
+- Customer names or company names
+- Previous discussions about the same issue
+- Any additional context that would be helpful for the DS team
+
+Recent channel history:
+\`\`\`
+${channelHistory}
+\`\`\`
+` : ""}
+
+IMPORTANT: Before creating a ticket, if any required information (team ID, customer name, etc.) is missing from the immediate conversation, use the searchChannelHistory tool to look for this information in the broader channel history. Always try to gather as much context as possible from the channel history before creating the ticket.
+
 After acknowledging their request and explaining how DS can help, ALWAYS create a ticket automatically by using the createTicket tool. Do not ask for permission - just create it and let them know it's been created.`,
     messages,
     tools: {
+      searchChannelHistory: tool({
+        description: "Search through the recent channel history to find specific information like team IDs, project IDs, customer names, or other context. Use this tool BEFORE creating a ticket if you're missing required information.",
+        inputSchema: z.object({
+          searchQuery: z.string().describe("What you're looking for (e.g., 'team ID', 'project ID', 'customer name', 'company name')"),
+        }),
+        execute: async ({ searchQuery }: { searchQuery: string }) => {
+          if (!channelHistory) {
+            return {
+              found: false,
+              message: "No channel history available to search.",
+            };
+          }
+
+          // Simple keyword search in the channel history
+          const lowerQuery = searchQuery.toLowerCase();
+          const historyLines = channelHistory.split("\n");
+
+          // Look for team IDs (format: team_XXXXXXXXXXXXXXXXXXXXXXXX)
+          const teamIdMatches = channelHistory.match(/team_[a-zA-Z0-9]{24,}/g);
+
+          // Look for project IDs (format: prj_XXXXXXXXXXXXXXXXXXXXXXXX)
+          const projectIdMatches = channelHistory.match(/prj_[a-zA-Z0-9]{24,}/g);
+
+          // Find relevant lines that contain the search query
+          const relevantLines = historyLines
+            .filter(line => line.toLowerCase().includes(lowerQuery))
+            .slice(0, 10); // Limit to 10 most relevant lines
+
+          const results = {
+            found: relevantLines.length > 0 || (teamIdMatches && teamIdMatches.length > 0) || (projectIdMatches && projectIdMatches.length > 0),
+            teamIds: teamIdMatches ? [...new Set(teamIdMatches)] : [],
+            projectIds: projectIdMatches ? [...new Set(projectIdMatches)] : [],
+            relevantContext: relevantLines.join("\n"),
+            message: relevantLines.length > 0
+              ? `Found ${relevantLines.length} relevant mentions in channel history.`
+              : "No direct matches found in channel history.",
+          };
+
+          return results;
+        },
+      }),
       createTicket: tool({
         description: "Post a DS support ticket request to the Linear channel. Use this tool to AUTOMATICALLY create a ticket after acknowledging the request and explaining how DS can help. ALWAYS create a ticket for in-scope requests - do not ask for permission. Extract as much customer context as possible from the conversation and generate a concise summary.",
         inputSchema: z.object({

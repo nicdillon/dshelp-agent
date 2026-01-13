@@ -119,6 +119,44 @@ export async function getThread(
   return result;
 }
 
+export async function getChannelHistory(
+  channel_id: string,
+  botUserId: string,
+  limit: number = 100,
+): Promise<string> {
+  const { messages } = await client.conversations.history({
+    channel: channel_id,
+    limit: limit,
+  });
+
+  if (!messages) return "";
+
+  // Format messages as contextual history
+  const contextHistory = messages
+    .reverse() // Show oldest first for chronological order
+    .map((message) => {
+      if (!message.text) return null;
+
+      const isBot = !!message.bot_id;
+      let content = message.text;
+
+      // Remove bot mentions for cleaner context
+      if (!isBot && content.includes(`<@${botUserId}>`)) {
+        content = content.replace(`<@${botUserId}> `, "");
+      }
+
+      // Format with timestamp for context
+      const timestamp = message.ts ? new Date(parseFloat(message.ts) * 1000).toISOString() : "";
+      const author = isBot ? "Bot" : "User";
+
+      return `[${timestamp}] ${author}: ${content}`;
+    })
+    .filter((msg): msg is string => msg !== null)
+    .join("\n");
+
+  return contextHistory;
+}
+
 export const getBotId = async () => {
   const { user_id: botUserId } = await client.auth.test();
 

@@ -1,6 +1,6 @@
 // Slack event types
 type AppMentionEvent = any;
-import { client, getThread } from "./slack-utils";
+import { client, getThread, getChannelHistory } from "./slack-utils";
 import { generateResponse } from "./generate-response";
 import { classifyRequest } from "./classify-request";
 import { generateRoutingResponse } from "./generate-routing-response";
@@ -48,6 +48,9 @@ export async function handleNewAppMention(
     messages = [{ role: "user" as const, content: event.text }];
   }
 
+  // Retrieve channel history for additional context
+  const channelHistory = await getChannelHistory(channel, botUserId, 100);
+
   // Classify the request to check if it's in DS scope
   const classification = await classifyRequest(messages);
 
@@ -70,7 +73,7 @@ export async function handleNewAppMention(
     const threadTs = thread_ts ?? event.ts;
     const slackThreadUrl = `https://slack.com/app_redirect?channel=${channel}&thread_ts=${threadTs}`;
 
-    result = await generateResponse(messages, updateMessage, slackThreadUrl);
+    result = await generateResponse(messages, updateMessage, slackThreadUrl, channelHistory);
   }
 
   await updateMessage(result);

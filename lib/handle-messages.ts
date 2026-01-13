@@ -1,7 +1,7 @@
 // Slack event types
 type AssistantThreadStartedEvent = any;
 type GenericMessageEvent = any;
-import { client, getThread, updateStatusUtil } from "./slack-utils";
+import { client, getThread, getChannelHistory, updateStatusUtil } from "./slack-utils";
 import { generateResponse } from "./generate-response";
 import { classifyRequest } from "./classify-request";
 import { generateRoutingResponse } from "./generate-routing-response";
@@ -57,6 +57,9 @@ export async function handleNewAssistantMessage(
 
   const messages = await getThread(channel, thread_ts, botUserId);
 
+  // Retrieve channel history for additional context
+  const channelHistory = await getChannelHistory(channel, botUserId, 100);
+
   // Classify the request to check if it's in DS scope
   const classification = await classifyRequest(messages);
 
@@ -78,7 +81,7 @@ export async function handleNewAssistantMessage(
     // Build Slack thread URL
     const slackThreadUrl = `https://slack.com/app_redirect?channel=${channel}&thread_ts=${thread_ts}`;
 
-    result = await generateResponse(messages, updateStatus, slackThreadUrl);
+    result = await generateResponse(messages, updateStatus, slackThreadUrl, channelHistory);
   }
 
   await client.chat.postMessage({
