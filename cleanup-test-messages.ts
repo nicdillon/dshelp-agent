@@ -98,6 +98,9 @@ async function main() {
     console.log('CLEANUP TEST MESSAGES');
     console.log('=' .repeat(80));
 
+    // Check for --yes flag
+    const autoConfirm = process.argv.includes('--yes') || process.argv.includes('-y');
+
     // Find bot messages
     const botMessages = await findBotMessages();
 
@@ -107,7 +110,12 @@ async function main() {
     }
 
     // Confirm deletion
-    const confirmed = await promptConfirmation();
+    let confirmed = autoConfirm;
+    if (!autoConfirm) {
+      confirmed = await promptConfirmation();
+    } else {
+      console.log('\n✅ Auto-confirming deletion (--yes flag provided)');
+    }
 
     if (!confirmed) {
       console.log('\n❌ Deletion cancelled.');
