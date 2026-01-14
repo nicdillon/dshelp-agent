@@ -8,48 +8,54 @@ export const generateRoutingResponse = (options: RoutingResponseOptions): string
   const { category, suggestedTeam, reasoning } = options;
 
   const teamRouting: Record<string, string> = {
-    "implementation-work": `For full implementation or delivery work, I recommend connecting with **Professional Services** or our partner network. The Developer Success team provides guidance, reviews, and patterns, but doesn't handle complete feature builds or app ownership. Your account team can help connect you with the right implementation resources.`,
+    "implementation-work": `**Route to: Professional Services (paid)**
 
-    "long-term-ownership": `For long-term or embedded technical ownership, please connect with your **Platform Architect** or designated Technical Contact. The Developer Success team focuses on time-boxed, high-leverage technical acceleration rather than ongoing technical ownership.`,
+This requires multi-hour implementation sessions or building features. DSE provides guidance and patterns, not full builds. Customer will need to purchase Professional Services hours for this work.`,
 
-    "billing-pricing-commercial": `For pricing, billing, or commercial questions, please reach out to:
-• **Sales Engineering / FinOps** for pricing models and cost calculations
-• **Deal Desk / Enterprise Activation** for contract changes and entitlements
-• Your **Account Executive** for seat management and plan changes
+    "long-term-ownership": `**Route to: AE/CSM for Platform Architect evaluation**
 
-You can also visit https://vercel.com/help for general billing support.`,
+Customer is requesting ongoing technical ownership. Based on their ARR and strategic importance, work with AE/CSM to determine if they qualify for Platform Architect assignment. If not, DSE can handle one-off questions but not long-term embedded support.`,
 
-    "third-party-systems": `For deep work in third-party systems (like Sitecore, external CDNs/WAFs, or partner-managed infrastructure), I recommend connecting with **Professional Services** or your implementation partner. The Developer Success team's scope is limited to how those systems integrate with Vercel.`,
+    "billing-pricing-commercial": `**Route to: AE/CSM (+ FinOps/Deal Desk if needed)**
 
-    "support-incidents": `For support tickets or platform incident management, please:
-• Visit https://vercel.com/help to open a support ticket
-• Contact your designated support channel
+This is a commercial/contract question:
+• Contract adjustments, MIU commitments → AE/CSM + FinOps/Deal Desk
+• Enterprise billing questions → AE/CSM
+• Invoice/payment issues → AE/CSM + FinOps/Billing Ops
 
-The Developer Success team does not own ticket queues or run platform incidents. Infrastructure and product teams handle incidents with DS providing context as needed.`,
+Note: Technical usage optimization (how to reduce costs) IS DSE scope.`,
 
-    "general-support": `For general account support, password resets, or basic configuration help, please visit https://vercel.com/help or contact our Support team through your dashboard.`,
+    "third-party-systems": `**Route to: Third-party vendor support (+ Professional Services if implementation needed)**
+
+This is tool-specific to the third-party system. Customer should contact the vendor's support. If they need implementation help integrating with Vercel, Professional Services (paid) can assist. DSE can advise if the issue is primarily Next.js/Vercel related.`,
+
+    "support-incidents": `**Route to: CSE via support ticket**
+
+This appears to be a platform bug or incident. Customer should create a support ticket at **vercel.com/help**. If customer is struggling, you can create a ticket via \`/support\` command in Slack. CSE will triage and investigate.`,
+
+    "general-support": `**Route to: CSE via support ticket or appropriate team**
+
+Customer should create a support ticket at **vercel.com/help** for platform issues. For account management issues, route to AE/CSM who can engage Account EPD (#help-accounts).`,
 
     "out-of-scope": suggestedTeam
-      ? `This request would be best handled by **${suggestedTeam}**. Please reach out to them for assistance.`
-      : "This question is outside the Developer Success team's scope. Please contact your account team or visit https://vercel.com/help for assistance.",
+      ? `**Route to: ${suggestedTeam}**`
+      : "**Route to: AE/CSM or appropriate team based on issue type**",
   };
 
   const routingMessage = teamRouting[category] || teamRouting["out-of-scope"];
 
-  return `Hi there! 👋
+  return `I've reviewed the customer issue in this channel. This request is **OUT OF DSE SCOPE**.
 
-I'm the Developer Success AI assistant. I specialize in time-boxed technical acceleration including:
+**DSE handles:**
 • Deep technical debugging & performance investigations
-• Usage, cost, and efficiency guidance
+• Usage, cost, and efficiency guidance (technical optimization)
 • Onboarding, enablement, and go-live support
 • Product & feature guidance
-• AI SDK implementation help
+• One-off technical design reviews
 
-**Why I'm re-routing your request:**
+**Classification:**
 ${reasoning}
 
-**Where to go instead:**
-${routingMessage}
-
-If you have questions about technical troubleshooting, performance optimization, or Vercel/Next.js best practices, I'm here to help!`;
+**Routing recommendation:**
+${routingMessage}`;
 };
