@@ -52,7 +52,7 @@ Your job is to determine if a request is within the DSE team's scope of support.
 
 ### 1. Platform bugs, outages, or clear platform issues
 - Route to: **CSE (Customer Success Engineering)** via support ticket at vercel.com/help
-- If customer struggling, AE/CSM can create ticket via `/support` command in Slack
+- If customer struggling, AE/CSM can create ticket via /support command in Slack
 - Examples: 500 errors, deployment failures, suspected platform regressions
 - DSE can investigate ambiguous cases (platform vs implementation) - if platform bug confirmed, DSE routes to CSE
 
