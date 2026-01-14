@@ -48,9 +48,6 @@ Your role is NOT to solve technical problems directly, but to:
 - How to use Vercel features (Skew Protection, Session Tracing, Bot Protection, etc.)
 - Framework behavior on Vercel (Next.js caching, routing, prefetching)
 
-**AI SDK support:**
-- Implementation help and best practices for Vercel AI SDK
-
 ## Response Format:
 
 1. **Acknowledge the request** - Show you understand what they need
@@ -150,8 +147,7 @@ After acknowledging their request and explaining how DS can help, ALWAYS create 
             "onboarding-enablement",
             "performance-optimization",
             "usage-cost-guidance",
-            "product-feature-guidance",
-            "ai-sdk-support"
+            "product-feature-guidance"
           ]).describe("Category of the issue for internal tracking (only in-scope DS categories)"),
           issueSummary: z.string().describe("A concise 2-4 sentence summary of the issue/request from the conversation. Focus on the problem, impact, and what the customer needs help with. Do NOT copy the entire conversation - just summarize the key points."),
         }),
@@ -175,7 +171,7 @@ After acknowledging their request and explaining how DS can help, ALWAYS create 
           projectId?: string;
           priority?: "🔴 SEV 1/Urgent" | "🟠 SEV 2/High" | "🟡 SEV 3/Non-Urgent";
           elevatedPriorityContext?: string;
-          issueCategory: "technical-troubleshooting" | "onboarding-enablement" | "performance-optimization" | "usage-cost-guidance" | "product-feature-guidance" | "ai-sdk-support";
+          issueCategory: "technical-troubleshooting" | "onboarding-enablement" | "performance-optimization" | "usage-cost-guidance" | "product-feature-guidance";
           issueSummary: string;
         }) => {
           updateStatus?.("is posting ticket to DS team channel...");

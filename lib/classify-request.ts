@@ -46,10 +46,6 @@ Your job is to determine if a request is within the DS team's scope of support.
 - Short calls to walk through findings, reinforce recommendations, build customer confidence
 - One-off technical guidance for accounts without a Platform Architect
 
-### 6. AI SDK support
-- Implementation help and questions about Vercel AI SDK features
-- Integration guidance and best practices for AI SDK usage
-
 ## OUT OF SCOPE - Re-route these requests:
 
 ### 1. Long-term or embedded technical ownership
@@ -94,7 +90,6 @@ Analyze the user's request and classify it.`,
         "performance-optimization",
         "usage-cost-guidance",
         "product-feature-guidance",
-        "ai-sdk-support",
         "implementation-work",
         "long-term-ownership",
         "billing-pricing-commercial",
