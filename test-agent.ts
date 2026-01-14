@@ -1,16 +1,24 @@
 /**
  * Test script for DSE agent classification and routing
- * Runs test scenarios without posting to Slack
+ *
+ * SAFETY WARNING: This script ONLY tests classification logic.
+ * It does NOT test response generation or ticket creation to avoid posting to real Slack channels.
+ *
+ * To test full response generation safely, you would need to:
+ * 1. Mock the Slack client before importing any modules
+ * 2. Use a test Slack workspace
+ * 3. Set SLACK_TICKET_CHANNEL_ID to a test channel
  */
+
+// Safety check: Warn if running in production environment
+if (process.env.SLACK_TICKET_CHANNEL_ID && !process.env.SLACK_TICKET_CHANNEL_ID.includes("test")) {
+  console.error("\n⚠️  WARNING: SLACK_TICKET_CHANNEL_ID appears to be a production channel!");
+  console.error("⚠️  This test only validates classification logic, not response generation.");
+  console.error("⚠️  To avoid accidental Slack posts, set SLACK_TICKET_CHANNEL_ID to a test channel.\n");
+}
 
 import { ModelMessage } from "ai";
 import { classifyRequest } from "./lib/classify-request";
-import { generateResponse } from "./lib/generate-response";
-
-// Mock Slack posting to avoid creating real messages
-const mockUpdateStatus = async (status: string) => {
-  console.log(`[Mock Status Update]: ${status}`);
-};
 
 interface TestScenario {
   name: string;
@@ -178,28 +186,12 @@ async function runTest(scenario: TestScenario): Promise<boolean> {
       );
     }
 
-    // Step 2: Generate response (only if in-scope)
-    if (classification.isInScope) {
-      console.log("\n📝 Step 2: Generating DSE response...\n");
-      const response = await generateResponse(
-        messages,
-        mockUpdateStatus,
-        "https://slack.com/app_redirect?channel=C123&thread_ts=1234567890.123456",
-        scenario.channelHistory
-      );
-
-      console.log("Generated Response:");
-      console.log(`${response}\n`);
-
-      // Check if ticket creation was mentioned
-      if (response.includes("ticket") || response.includes("DSE")) {
-        console.log("✅ Response indicates ticket creation or DSE engagement");
-      } else {
-        console.log("⚠️  WARNING: Response doesn't clearly indicate DSE ticket creation");
-      }
+    // Step 2: Validate expected team routing (classification only - no response generation)
+    if (!classification.isInScope) {
+      console.log("\n✅ Correctly identified as out-of-scope\n");
     } else {
-      console.log("\n📝 Step 2: Request is out-of-scope, no DSE response needed\n");
-      console.log(`✅ Correctly identified as out-of-scope`);
+      console.log("\n✅ Correctly identified as in-scope for DSE\n");
+      console.log("⚠️  NOTE: Not testing response generation to avoid posting to Slack");
     }
 
     return passed;
@@ -211,8 +203,11 @@ async function runTest(scenario: TestScenario): Promise<boolean> {
 
 async function runAllTests() {
   console.log("\n" + "=".repeat(80));
-  console.log("DSE AGENT TEST SUITE");
+  console.log("DSE AGENT TEST SUITE - CLASSIFICATION ONLY");
   console.log("=".repeat(80));
+  console.log("⚠️  These tests ONLY validate classification logic");
+  console.log("⚠️  Response generation is NOT tested to avoid Slack posts");
+  console.log("=".repeat(80) + "\n");
 
   const results: { name: string; passed: boolean }[] = [];
 
