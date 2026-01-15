@@ -7,11 +7,13 @@ import { postTicketCreationMessage } from "./create-ticket-message";
 // IMPORTANT: Don't pass apiKey property at all to enable OIDC on Vercel
 // If an API key is present, it will always be used instead of OIDC
 const gatewayApiKey = process.env.AI_GATEWAY_API_KEY?.trim();
+console.log('[gateway] Initializing gateway. Has API key:', !!gatewayApiKey);
 const gateway = createGateway(
   gatewayApiKey && gatewayApiKey.length > 0
     ? { apiKey: gatewayApiKey }
     : {} // Empty object allows OIDC to work on Vercel
 );
+console.log('[gateway] Gateway initialized');
 
 export const generateResponse = async (
   messages: ModelMessage[],
@@ -24,9 +26,7 @@ export const generateResponse = async (
   console.log('[generateResponse] Has channel history:', !!channelHistory);
 
   try {
-    const { text } = await generateText({
-    model: gateway("openai/gpt-4o"),
-    system: `You are an intake assistant for the Vercel Developer Success Engineering (DSE) team.
+    const systemPrompt = `You are an intake assistant for the Vercel Developer Success Engineering (DSE) team.
 
 IMPORTANT: You are an INTERNAL tool used by field team members (AEs, CSMs, SEs) to triage customer issues and determine routing.
 - You are @mentioned by field team members in customer Slack channels
@@ -125,8 +125,16 @@ IMPORTANT: Before creating a ticket, if any required information (team ID, custo
 
 For CUSTOMER ISSUES that are IN-SCOPE (new or ongoing): After reviewing the customer issue and gathering context, ALWAYS create a DSE ticket automatically by using the createTicket tool. Do not ask for permission - just create it and confirm to the field team member that the ticket has been created. If DSE is already engaged, make sure the ticket summary reflects the current state of work (e.g., "DSE is actively investigating revalidatePath issue, created reproduction, coordinating with CDN/Next.js teams").
 
-For INFORMATIONAL questions about DSE: Do NOT create a ticket. These are field team members asking about DSE capabilities, not customer issues requiring DSE engagement. Simply provide a helpful answer.`,
-    messages,
+For INFORMATIONAL questions about DSE: Do NOT create a ticket. These are field team members asking about DSE capabilities, not customer issues requiring DSE engagement. Simply provide a helpful answer.`;
+
+    console.log('[generateResponse] System prompt length:', systemPrompt.length);
+    console.log('[generateResponse] Number of messages:', messages.length);
+    console.log('[generateResponse] Calling generateText...');
+
+    const { text } = await generateText({
+      model: gateway("openai/gpt-4o"),
+      system: systemPrompt,
+      messages,
     tools: {
       searchChannelHistory: tool({
         description: "Search through the recent channel history to find specific information like team IDs, project IDs, customer names, or other context. Use this tool BEFORE creating a ticket if you're missing required information.",

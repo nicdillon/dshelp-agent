@@ -51,24 +51,35 @@ export async function handleNewAppMention(
   const updateMessage = await updateStatusUtil("is analyzing your request...", event);
 
   try {
+    console.log('[handleNewAppMention] Processing mention from user:', event.user);
+    console.log('[handleNewAppMention] Event text:', event.text);
+    console.log('[handleNewAppMention] Channel:', channel, 'Thread:', thread_ts);
+
     let messages;
     if (thread_ts) {
+      console.log('[handleNewAppMention] Fetching thread messages');
       messages = await getThread(channel, thread_ts, botUserId);
     } else {
+      console.log('[handleNewAppMention] No thread, using direct message');
       messages = [{ role: "user" as const, content: event.text }];
     }
+    console.log('[handleNewAppMention] Messages count:', messages.length);
 
     // Retrieve channel history for additional context
+    console.log('[handleNewAppMention] Fetching channel history');
     const channelHistory = await getChannelHistory(channel, botUserId, 100);
+    console.log('[handleNewAppMention] Channel history length:', channelHistory.length);
 
     // Classify the request to check if it's in DS scope
+    console.log('[handleNewAppMention] Starting classification');
     const classification = await classifyRequest(messages);
 
-    console.log(`App mention classification:`, JSON.stringify(classification));
+    console.log(`[handleNewAppMention] Classification result:`, JSON.stringify(classification));
 
     let result: string;
 
     if (!classification.isInScope) {
+      console.log('[handleNewAppMention] Request is OUT OF SCOPE');
       // Out of scope - provide routing guidance
       result = generateRoutingResponse({
         category: classification.category,
@@ -76,6 +87,7 @@ export async function handleNewAppMention(
         reasoning: classification.reasoning,
       });
     } else {
+      console.log('[handleNewAppMention] Request is IN SCOPE - generating response');
       // In scope - generate full response
       await updateMessage("is working on your request...");
 
@@ -83,10 +95,14 @@ export async function handleNewAppMention(
       const threadTs = thread_ts ?? event.ts;
       const slackThreadUrl = `https://slack.com/app_redirect?channel=${channel}&thread_ts=${threadTs}`;
 
+      console.log('[handleNewAppMention] Calling generateResponse');
       result = await generateResponse(messages, updateMessage, slackThreadUrl, channelHistory);
+      console.log('[handleNewAppMention] generateResponse returned, result length:', result?.length || 0);
     }
 
+    console.log('[handleNewAppMention] About to post final result');
     await updateMessage(result);
+    console.log('[handleNewAppMention] Successfully completed');
   } catch (error) {
     console.error("Error handling app mention:", error);
     await updateMessage(
