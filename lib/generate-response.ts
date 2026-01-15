@@ -19,7 +19,12 @@ export const generateResponse = async (
   slackThreadUrl?: string,
   channelHistory?: string,
 ) => {
-  const { text } = await generateText({
+  console.log('[generateResponse] Starting response generation');
+  console.log('[generateResponse] Messages:', JSON.stringify(messages, null, 2));
+  console.log('[generateResponse] Has channel history:', !!channelHistory);
+
+  try {
+    const { text } = await generateText({
     model: gateway("openai/gpt-4o"),
     system: `You are an intake assistant for the Vercel Developer Success Engineering (DSE) team.
 
@@ -246,6 +251,22 @@ For INFORMATIONAL questions about DSE: Do NOT create a ticket. These are field t
     },
   });
 
-  // Convert markdown to Slack mrkdwn format
-  return text.replace(/\[(.*?)\]\((.*?)\)/g, "<$2|$1>").replace(/\*\*/g, "*");
+    console.log('[generateResponse] Generated text length:', text?.length || 0);
+    console.log('[generateResponse] Generated text preview:', text?.substring(0, 200));
+
+    if (!text || text.trim().length === 0) {
+      console.error('[generateResponse] ERROR: Generated text is empty!');
+      return "⚠️ The AI response was empty. Please try rephrasing your request.";
+    }
+
+    // Convert markdown to Slack mrkdwn format
+    const formattedText = text.replace(/\[(.*?)\]\((.*?)\)/g, "<$2|$1>").replace(/\*\*/g, "*");
+    console.log('[generateResponse] Successfully generated response');
+    return formattedText;
+
+  } catch (error) {
+    console.error('[generateResponse] ERROR during text generation:', error);
+    console.error('[generateResponse] Error stack:', error instanceof Error ? error.stack : 'No stack trace');
+    return "⚠️ An error occurred while generating the response. Please check the logs and try again.";
+  }
 };
