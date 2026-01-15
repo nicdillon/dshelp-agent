@@ -131,6 +131,7 @@ For INFORMATIONAL questions about DSE: Do NOT create a ticket. These are field t
       model: gateway("openai/gpt-4o"),
       system: systemPrompt,
       messages,
+      maxSteps: 5, // Allow up to 5 steps for tool calling (search history, create ticket, etc.)
     tools: {
       searchChannelHistory: tool({
         description: "Search through the recent channel history to find specific information like team IDs, project IDs, customer names, or other context. Use this tool BEFORE creating a ticket if you're missing required information.",
