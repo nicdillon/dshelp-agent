@@ -12,6 +12,7 @@ interface TicketDetails {
   request: string; // The main request/issue description
   slackThreadUrl?: string; // Link back to Slack thread
   issueCategory?: string; // For internal tracking
+  issueTitle: string; // Concise title for the ticket
 }
 
 export const postTicketCreationMessage = async (details: TicketDetails) => {
@@ -35,6 +36,7 @@ export const postTicketCreationMessage = async (details: TicketDetails) => {
     request,
     slackThreadUrl,
     issueCategory,
+    issueTitle,
   } = details;
 
   // Build a formatted message matching Linear Ask form
@@ -180,7 +182,7 @@ export const postTicketCreationMessage = async (details: TicketDetails) => {
   try {
     const result = await client.chat.postMessage({
       channel: ticketChannelId,
-      text: `DS Support Ticket for ${customerName} (${teamId})`,
+      text: `${issueTitle} - ${customerName}`,
       blocks: blocks,
     });
 

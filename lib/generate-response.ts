@@ -192,6 +192,7 @@ For INFORMATIONAL questions about DSE: Do NOT create a ticket. These are field t
             "usage-cost-guidance",
             "product-feature-guidance"
           ]).describe("Category of the issue for internal tracking (only in-scope DS categories)"),
+          issueTitle: z.string().describe("A short, concise title for the ticket (5-10 words max). Examples: 'Investigate Fluid Compute session overlap', 'Cold start performance degradation', 'ISR cache not invalidating'"),
           issueSummary: z.string().describe("A concise 2-4 sentence summary of the issue/request from the conversation. Focus on the problem, impact, and what the customer needs help with. Do NOT copy the entire conversation - just summarize the key points."),
         }),
         execute: async ({
@@ -204,6 +205,7 @@ For INFORMATIONAL questions about DSE: Do NOT create a ticket. These are field t
           priority,
           elevatedPriorityContext,
           issueCategory,
+          issueTitle,
           issueSummary,
         }: {
           customer: string;
@@ -215,6 +217,7 @@ For INFORMATIONAL questions about DSE: Do NOT create a ticket. These are field t
           priority?: "🔴 SEV 1/Urgent" | "🟠 SEV 2/High" | "🟡 SEV 3/Non-Urgent";
           elevatedPriorityContext?: string;
           issueCategory: "technical-troubleshooting" | "onboarding-enablement" | "performance-optimization" | "usage-cost-guidance" | "product-feature-guidance";
+          issueTitle: string;
           issueSummary: string;
         }) => {
           updateStatus?.("is posting ticket to DS team channel...");
@@ -237,6 +240,7 @@ For INFORMATIONAL questions about DSE: Do NOT create a ticket. These are field t
               request: requestWithThread,
               slackThreadUrl,
               issueCategory,
+              issueTitle,
             });
 
             return {
