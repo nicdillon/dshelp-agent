@@ -18,8 +18,20 @@ export const classifyRequest = async (messages: ModelMessage[]) => {
 
 IMPORTANT: You are helping INTERNAL field team members (AEs, CSMs, SEs) determine if customer issues should be routed to DSE or other teams.
 
-## SPECIAL CASE: Meta-Questions About DSE
+## SPECIAL CASES:
+
+### Meta-Questions About DSE
 If the request is asking ABOUT DSE itself (e.g., "What can DSE help with?", "What does DSE do?", "When should I engage DSE?"), classify this as IN-SCOPE with category "dse-informational". These are not customer issues - they're field team members asking about DSE capabilities.
+
+### Tracking/Documenting Ongoing DSE Work
+If the request is to "create a ticket to track this work" or "document this ongoing investigation" where DSE is ALREADY engaged, this IS in-scope. The state of the work (not started, in progress, nearly complete) does NOT matter. What matters is whether the work itself is DSE-scope.
+
+Examples of in-scope tracking requests:
+- "DSE is working with customer on cold starts, can you create a ticket to track this?"
+- "We've been investigating this ISR issue with the customer, create a ticket for it"
+- "Can you capture the details of this thread and create a help dev success ticket to track this work?"
+
+If the underlying work is DSE-scope (debugging, performance, onboarding, etc.), then creating a ticket to track it is in-scope, regardless of work state.
 
 Your job is to determine if a request is within the DSE team's scope of support.
 
