@@ -9,19 +9,18 @@ const updateStatusUtil = async (
   initialStatus: string,
   event: AppMentionEvent,
 ) => {
-  const initialMessage = await client.chat.postMessage({
+  // Post ephemeral status (only visible to user who mentioned bot)
+  await client.chat.postEphemeral({
     channel: event.channel,
-    thread_ts: event.thread_ts ?? event.ts,
+    user: event.user,
     text: initialStatus,
   });
 
-  if (!initialMessage || !initialMessage.ts)
-    throw new Error("Failed to post initial message");
-
   const updateMessage = async (status: string) => {
-    await client.chat.update({
+    // Post new ephemeral message (can't update ephemeral messages)
+    await client.chat.postEphemeral({
       channel: event.channel,
-      ts: initialMessage.ts as string,
+      user: event.user,
       text: status,
     });
   };
@@ -37,6 +36,10 @@ export async function handleNewAppMention(
     console.log("Skipping app mention");
     return;
   }
+
+  // NOTE: All agent responses are posted as ephemeral messages (only visible to user who @mentioned bot)
+  // This prevents customers from seeing internal routing discussions
+  // DSE ticket creation messages to the ticket channel remain public (not ephemeral)
 
   const { thread_ts, channel } = event;
   const updateMessage = await updateStatusUtil("is analyzing your request...", event);
