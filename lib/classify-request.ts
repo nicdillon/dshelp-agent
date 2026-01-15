@@ -18,6 +18,9 @@ export const classifyRequest = async (messages: ModelMessage[]) => {
 
 IMPORTANT: You are helping INTERNAL field team members (AEs, CSMs, SEs) determine if customer issues should be routed to DSE or other teams.
 
+## SPECIAL CASE: Meta-Questions About DSE
+If the request is asking ABOUT DSE itself (e.g., "What can DSE help with?", "What does DSE do?", "When should I engage DSE?"), classify this as IN-SCOPE with category "dse-informational". These are not customer issues - they're field team members asking about DSE capabilities.
+
 Your job is to determine if a request is within the DSE team's scope of support.
 
 ## IN SCOPE - Engage DSE Team when the request involves:
@@ -115,6 +118,7 @@ Analyze the user's request and classify it.`,
     schema: z.object({
       isInScope: z.boolean().describe("True if the request is within DS team scope, false otherwise"),
       category: z.enum([
+        "dse-informational",
         "technical-troubleshooting",
         "onboarding-enablement",
         "performance-optimization",
