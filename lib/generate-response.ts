@@ -109,17 +109,13 @@ When offering to create a ticket, you need to extract:
 - Urgency and impact to determine priority (production issues = higher priority)
 
 ## Channel History Context:
-${channelHistory ? `You have access to recent channel history to help gather context for ticket creation. Use the searchChannelHistory tool to look for:
+${channelHistory ? `You have access to recent channel history (${Math.round(channelHistory.length / 1000)}KB of messages) via the searchChannelHistory tool. Use it to look for:
 - Team IDs and Project IDs that may have been mentioned earlier in the conversation
 - Customer names or company names
 - Previous discussions about the same issue
 - Any additional context that would be helpful for the DS team
 
-Recent channel history:
-\`\`\`
-${channelHistory}
-\`\`\`
-` : ""}
+The searchChannelHistory tool will search through the full channel history and return relevant matches.` : ""}
 
 IMPORTANT: Before creating a ticket, if any required information (team ID, customer name, etc.) is missing from the immediate conversation, use the searchChannelHistory tool to look for this information in the broader channel history. Always try to gather as much context as possible from the channel history before creating the ticket.
 
