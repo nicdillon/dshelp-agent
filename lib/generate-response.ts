@@ -127,7 +127,7 @@ For INFORMATIONAL questions about DSE: Do NOT create a ticket. These are field t
     console.log('[generateResponse] Number of messages:', messages.length);
     console.log('[generateResponse] Calling generateText...');
 
-    const { text } = await generateText({
+    const response = await generateText({
       model: gateway("openai/gpt-4o"),
       system: systemPrompt,
       messages,
@@ -255,16 +255,24 @@ For INFORMATIONAL questions about DSE: Do NOT create a ticket. These are field t
     },
   });
 
-    console.log('[generateResponse] Generated text length:', text?.length || 0);
-    console.log('[generateResponse] Generated text preview:', text?.substring(0, 200));
+    console.log('[generateResponse] Full response object:', JSON.stringify({
+      text: response.text?.substring(0, 200),
+      textLength: response.text?.length || 0,
+      finishReason: response.finishReason,
+      usage: response.usage,
+      toolCalls: response.toolCalls?.length || 0,
+    }, null, 2));
 
-    if (!text || text.trim().length === 0) {
+    console.log('[generateResponse] Generated text length:', response.text?.length || 0);
+    console.log('[generateResponse] Generated text preview:', response.text?.substring(0, 200));
+
+    if (!response.text || response.text.trim().length === 0) {
       console.error('[generateResponse] ERROR: Generated text is empty!');
       return "⚠️ The AI response was empty. Please try rephrasing your request.";
     }
 
     // Convert markdown to Slack mrkdwn format
-    const formattedText = text.replace(/\[(.*?)\]\((.*?)\)/g, "<$2|$1>").replace(/\*\*/g, "*");
+    const formattedText = response.text.replace(/\[(.*?)\]\((.*?)\)/g, "<$2|$1>").replace(/\*\*/g, "*");
     console.log('[generateResponse] Successfully generated response');
     return formattedText;
 

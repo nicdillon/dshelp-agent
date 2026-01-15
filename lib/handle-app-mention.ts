@@ -61,7 +61,9 @@ export async function handleNewAppMention(
       messages = await getThread(channel, thread_ts, botUserId);
     } else {
       console.log('[handleNewAppMention] No thread, using direct message');
-      messages = [{ role: "user" as const, content: event.text }];
+      // Remove bot mention from the message
+      const cleanedText = event.text.replace(`<@${botUserId}>`, '').trim();
+      messages = [{ role: "user" as const, content: cleanedText }];
     }
     console.log('[handleNewAppMention] Messages count:', messages.length);
 
