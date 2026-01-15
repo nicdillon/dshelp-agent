@@ -137,19 +137,36 @@ export async function getChannelHistory(
     .map((message) => {
       if (!message.text) return null;
 
-      const isBot = !!message.bot_id;
-      let content = message.text;
+      // Filter out only THIS bot's messages (keep other bots like d0)
+      const isDshelpBot = message.bot_id === botUserId || message.user === botUserId;
+      if (isDshelpBot) return null;
 
-      // Remove bot mentions for cleaner context
-      if (!isBot && content.includes(`<@${botUserId}>`)) {
-        content = content.replace(`<@${botUserId}> `, "");
-      }
+      // Skip very short messages (reactions, "ok", "thanks", etc.)
+      const trimmedText = message.text.trim();
+      if (trimmedText.length < 10) return null;
 
-      // Format with timestamp for context
-      const timestamp = message.ts ? new Date(parseFloat(message.ts) * 1000).toISOString() : "";
-      const author = isBot ? "Bot" : "User";
+      let content = trimmedText;
 
-      return `[${timestamp}] ${author}: ${content}`;
+      // Clean up Slack formatting
+      // Remove bot mentions
+      content = content.replace(new RegExp(`<@${botUserId}>\\s*`, 'g'), "");
+
+      // Simplify links: <http://example.com|example.com> → http://example.com
+      content = content.replace(/<(https?:\/\/[^|>]+)\|[^>]+>/g, '$1');
+      content = content.replace(/<(https?:\/\/[^>]+)>/g, '$1');
+
+      // Remove user mentions format but keep the ID for reference
+      content = content.replace(/<@(U[A-Z0-9]+)>/g, '@$1');
+
+      // Collapse multiple whitespaces/newlines
+      content = content.replace(/\s+/g, ' ').trim();
+
+      // Format with shortened timestamp
+      const timestamp = message.ts
+        ? new Date(parseFloat(message.ts) * 1000).toISOString().slice(0, 16).replace('T', ' ')
+        : "";
+
+      return `[${timestamp}] ${content}`;
     })
     .filter((msg): msg is string => msg !== null)
     .join("\n");
