@@ -11,10 +11,11 @@ const gateway = createGateway(
     : {} // Empty object allows OIDC to work on Vercel
 );
 
-export const classifyRequest = async (messages: ModelMessage[]) => {
-  const { object } = await generateObject({
-    model: gateway("openai/gpt-4o"),
-    system: `You are a request classifier for the Vercel Developer Success Engineering (DSE) team.
+export const classifyRequest = async (
+  messages: ModelMessage[],
+  enrichedContext?: string
+) => {
+  const systemPrompt = `You are a request classifier for the Vercel Developer Success Engineering (DSE) team.
 
 IMPORTANT: You are helping INTERNAL field team members (AEs, CSMs, SEs) determine if customer issues should be routed to DSE or other teams.
 
@@ -128,7 +129,11 @@ Your job is to determine if a request is within the DSE team's scope of support.
 Engage DSE when the ask is time-boxed, technical, and high-leverage for adoption, performance, cost efficiency, or smooth onboarding/go-live.
 Re-route when it's: platform bugs (CSE), commercial (AE/CSM), long-term ownership (PA evaluation), implementation-heavy (Professional Services), or product-specific (see routing above).
 
-Analyze the user's request and classify it.`,
+Analyze the user's request and classify it.${enrichedContext ? `\n\n${enrichedContext}` : ''}`;
+
+  const { object } = await generateObject({
+    model: gateway("openai/gpt-4o"),
+    system: systemPrompt,
     schema: z.object({
       isInScope: z.boolean().describe("True if the request is within DS team scope, false otherwise"),
       category: z.enum([
