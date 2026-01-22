@@ -5,10 +5,10 @@
 The DSE Slack Agent (`@Dev Success Support Agent`) is an AI-powered bot that helps field team members (AEs, CSMs, SEs) triage customer issues and determine if they should be routed to the Developer Success Engineering (DSE) team.
 
 **Key Benefits:**
-- 🎯 Automatic triage and routing guidance
-- 📝 Automated ticket creation with context from channel history
-- ⚡ Faster response times for DSE engagement
-- 🔍 Smart context gathering (Team IDs, Project IDs, customer details)
+- Automatic triage and routing guidance
+- Automated ticket creation with context from channel history
+- Faster response times for DSE engagement
+- Smart context gathering (Team IDs, Project IDs, customer details)
 
 ---
 
@@ -29,17 +29,17 @@ Simply **@mention the agent** in any Slack channel or thread:
 
 ### Important Notes
 
-✅ **Your responses are private** - Only you can see the agent's reply (ephemeral messages)
+**Your responses are private** - Only you can see the agent's reply (ephemeral messages)
 
-✅ **DSE tickets are public** - When a ticket is created, it's posted to the DSE team channel for everyone to see
+**DSE tickets are public** - When a ticket is created, it's posted to the DSE team channel for everyone to see
 
-✅ **Agent searches channel history** - It automatically looks for Team IDs, Project IDs, and customer context in recent messages
+**Agent searches channel history** - It automatically looks for Team IDs, Project IDs, and customer context in recent messages
 
 ---
 
 ## When to Use the Agent
 
-### ✅ Use the agent when:
+### Use the agent when:
 
 1. **You need to engage DSE** for a customer issue
    - Technical debugging (cold starts, caching, ISR, routing issues)
@@ -57,7 +57,7 @@ Simply **@mention the agent** in any Slack channel or thread:
    - "What can DSE help with?"
    - "When should I engage the DSE team?"
 
-### ❌ Don't use the agent for:
+### Don't use the agent for:
 
 - Urgent production outages (ping DSE team directly in #help-dev-success)
 - Internal DSE team discussions
@@ -70,22 +70,22 @@ Simply **@mention the agent** in any Slack channel or thread:
 ### If Your Request is IN-SCOPE for DSE:
 
 **The agent will:**
-1. ✅ Analyze the request and channel history
-2. 🔍 Search for Team IDs, Project IDs, and customer context
-3. 🎫 **Automatically create a DSE ticket** with:
+1. Analyze the request and channel history
+2. Search for Team IDs, Project IDs, and customer context
+3. **Automatically create a DSE ticket** with:
    - Customer name and Team ID
    - Concise issue title (e.g., "Investigate Fluid Compute session overlap")
    - Issue summary with context
    - Priority level (SEV 1/2/3)
    - Link back to the Slack thread
-4. ✉️ Confirm ticket creation to you (ephemeral message)
+4. Confirm ticket creation to you (ephemeral message)
 
 **You'll see:**
 ```
-✅ DSE ticket created successfully! Posted to DSE team channel with:
+DSE ticket created successfully! Posted to DSE team channel with:
 - Customer: Acme Corp
 - Team ID: team_abc123xyz
-- Priority: 🟡 SEV 3/Non-Urgent
+- Priority: SEV 3/Non-Urgent
 
 DSE team will investigate and provide guidance.
 ```
@@ -93,9 +93,9 @@ DSE team will investigate and provide guidance.
 ### If Your Request is OUT-OF-SCOPE:
 
 **The agent will:**
-1. ✅ Explain what DSE handles
-2. 🔀 Provide specific routing guidance
-3. 📋 Tell you which team should handle this
+1. Explain what DSE handles
+2. Provide specific routing guidance
+3. Tell you which team should handle this
 
 **You'll see:**
 ```
@@ -145,10 +145,10 @@ despite webhook firing correctly. This is blocking their production deployment.
 ```
 
 **Expected result:**
-- ✅ Classified as IN-SCOPE (technical-troubleshooting)
-- 🎫 Ticket created with title: "Investigate revalidatePath cache clearing issue"
-- 🔴 Priority: SEV 2/High (production blocked)
-- 📝 Summary includes context from channel history
+- Classified as IN-SCOPE (technical-troubleshooting)
+- Ticket created with title: "Investigate revalidatePath cache clearing issue"
+- Priority: SEV 2/High (production blocked)
+- Summary includes context from channel history
 
 ---
 
@@ -161,10 +161,10 @@ ISR write units spiked after they upgraded to Next.js 15?
 ```
 
 **Expected result:**
-- ✅ Classified as IN-SCOPE (usage-cost-guidance)
-- 🎫 Ticket created with title: "ISR write units spike after Next.js 15 upgrade"
-- 🟡 Priority: SEV 3/Non-Urgent
-- 📝 Summary includes framework upgrade details
+- Classified as IN-SCOPE (usage-cost-guidance)
+- Ticket created with title: "ISR write units spike after Next.js 15 upgrade"
+- Priority: SEV 3/Non-Urgent
+- Summary includes framework upgrade details
 
 ---
 
@@ -177,9 +177,9 @@ bug with the customer. Can you create a ticket to track this work?
 ```
 
 **Expected result:**
-- ✅ Classified as IN-SCOPE (technical-troubleshooting)
-- 🎫 Ticket created with title: "Track Fluid Compute investigation"
-- 📝 Summary notes: "DSE is actively investigating with customer..."
+- Classified as IN-SCOPE (technical-troubleshooting)
+- Ticket created with title: "Track Fluid Compute investigation"
+- Summary notes: "DSE is actively investigating with customer..."
 
 ---
 
@@ -191,9 +191,9 @@ bug with the customer. Can you create a ticket to track this work?
 ```
 
 **Expected result:**
-- ❌ Classified as OUT-OF-SCOPE (clear platform issue)
-- 🔀 Routing: "CSE via support ticket at vercel.com/help"
-- 📋 Explanation: "This is a platform outage requiring CSE support"
+- Classified as OUT-OF-SCOPE (clear platform issue)
+- Routing: "CSE via support ticket at vercel.com/help"
+- Explanation: "This is a platform outage requiring CSE support"
 
 ---
 
@@ -205,9 +205,9 @@ bug with the customer. Can you create a ticket to track this work?
 ```
 
 **Expected result:**
-- ❌ Classified as OUT-OF-SCOPE (commercial/contract)
-- 🔀 Routing: "AE/CSM + FinOps/Deal Desk"
-- 📋 Explanation: "Contract adjustments are handled by AE/CSM with Deal Desk"
+- Classified as OUT-OF-SCOPE (commercial/contract)
+- Routing: "AE/CSM + FinOps/Deal Desk"
+- Explanation: "Contract adjustments are handled by AE/CSM with Deal Desk"
 
 ---
 
@@ -219,15 +219,15 @@ bug with the customer. Can you create a ticket to track this work?
 ```
 
 **Expected result:**
-- ℹ️ Informational response (no ticket created)
-- 📋 List of DSE capabilities
-- 📋 Guidance on when to engage DSE
+- Informational response (no ticket created)
+- List of DSE capabilities
+- Guidance on when to engage DSE
 
 ---
 
 ## Tips for Best Results
 
-### 🎯 Provide Context
+### Provide Context
 
 **Good:**
 ```
@@ -241,11 +241,11 @@ is impacting their checkout flow. Team ID is team_abc123.
 @Dev Success Support Agent cold starts are slow
 ```
 
-### 🧵 Use Threads When Possible
+### Use Threads When Possible
 
 If you're discussing a customer issue in a thread, @mention the agent **in that thread** so it has full conversation context.
 
-### 📝 Include Key Details
+### Include Key Details
 
 The agent searches channel history, but including these details helps:
 - Customer/company name
@@ -253,7 +253,7 @@ The agent searches channel history, but including these details helps:
 - Project ID (format: `prj_XXXXXXXXXXXXXXXXXXXXXXXX`)
 - Priority/urgency (production blocked, customer escalation, etc.)
 
-### 🔄 Mention Ongoing Work
+### Mention Ongoing Work
 
 If DSE is already engaged, mention it:
 ```
@@ -369,11 +369,11 @@ For the latest updates and documentation:
 
 | Situation | Action | Expected Result |
 |-----------|--------|-----------------|
-| Customer has technical issue DSE should investigate | `@Dev Success Support Agent create ticket for [issue]` | ✅ Ticket created |
-| Unsure if DSE can help | `@Dev Success Support Agent can DSE help with [issue]?` | ℹ️ Routing guidance |
-| Need to track ongoing DSE work | `@Dev Success Support Agent track this work` | ✅ Ticket created |
-| Want to know DSE capabilities | `@Dev Success Support Agent what can DSE help with?` | ℹ️ DSE capabilities list |
-| Platform outage or billing issue | `@Dev Success Support Agent [issue]` | ❌ Routing to CSE/AE/CSM |
+| Customer has technical issue DSE should investigate | `@Dev Success Support Agent create ticket for [issue]` | Ticket created |
+| Unsure if DSE can help | `@Dev Success Support Agent can DSE help with [issue]?` | Routing guidance |
+| Need to track ongoing DSE work | `@Dev Success Support Agent track this work` | Ticket created |
+| Want to know DSE capabilities | `@Dev Success Support Agent what can DSE help with?` | DSE capabilities list |
+| Platform outage or billing issue | `@Dev Success Support Agent [issue]` | Routing to CSE/AE/CSM |
 
 ---
 
