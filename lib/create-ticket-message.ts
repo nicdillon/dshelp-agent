@@ -181,55 +181,53 @@ export const postTicketCreationMessage = async (details: TicketDetails) => {
 
   // Build comprehensive plain text for Linear bot parsing
   // CRITICAL: Slack's Linear integration strips ALL newlines to spaces
-  // Pattern 1 regex REQUIRES \n, so it fails when collapsed
-  // Solution: Use Pattern 5 format (Customer: Name) which works without newlines
+  // This causes extraction patterns to fail or extract wrong text
+  // Solution: Use delimiters that survive when collapsed
 
-  let plainText = `**Request Form** submission\n\n`;
+  let plainText = `**Request Form** submission • `;
 
-  // Use Pattern 5 format which works when collapsed: Customer: CustomerName
-  plainText += `Customer: ${customerName}\n\n`;
+  // Use backticks to delimit customer name - clear boundary even when collapsed
+  plainText += `Customer: \`${customerName}\` • `;
 
-  // Customer Segment
+  // Customer Segment with bullet separator
   if (customerSegment) {
-    plainText += `Segment: ${customerSegment}\n\n`;
+    plainText += `Segment: ${customerSegment} • `;
   }
 
-  // IMPORTANT: Put Team ID at the END to prevent Pattern 6 extraction
-  // Pattern 6 extracts text adjacent to team ID, so we isolate it
-
-  // Priority first (safe from extraction)
-  plainText += `Priority: ${priority || "🟡 SEV 3/Non-Urgent"}\n\n`;
+  // Put non-extractable fields next
+  // Priority (safe - not a name)
+  plainText += `Priority: ${priority || "🟡 SEV 3/Non-Urgent"} • `;
 
   // Context on Elevated Priority
   if (elevatedPriorityContext) {
-    plainText += `Elevated Priority Context: ${elevatedPriorityContext}\n\n`;
+    plainText += `Elevated Context: ${elevatedPriorityContext} • `;
   }
 
-  // Notion Account Link (safe from extraction)
+  // Notion Account Link (URLs are filtered out by validation)
   if (notionLink) {
-    plainText += `Notion: ${notionLink}\n\n`;
+    plainText += `Notion: ${notionLink} • `;
   }
 
-  // Project ID (safe from extraction)
+  // Project ID (starts with prj_ so filtered out)
   if (projectId) {
-    plainText += `Project: ${projectId}\n\n`;
+    plainText += `Project: ${projectId} • `;
   }
 
-  // Request
-  plainText += `Request: ${request}\n\n`;
+  // Team ID with brackets to prevent extraction
+  plainText += `[Team: ${teamId}] • `;
+
+  // Admin link with clear URL marker
+  if (teamId && teamId !== 'team_unknown') {
+    plainText += `URL: https://admin.vercel.com/team/${teamId} • `;
+  }
+
+  // Request at the end
+  plainText += `\n\n**Request:** ${request}`;
 
   // Internal tracking
   if (issueCategory) {
-    plainText += `AI Classification: ${issueCategory}\n\n`;
+    plainText += `\n\n_AI Classification: ${issueCategory}_`;
   }
-
-  // Team ID LAST with no adjacent text that could be extracted
-  plainText += `Team ID: ${teamId}\n\n`;
-
-  // Admin link on separate "line" (though it will collapse to same line)
-  // Using parentheses to make it clear it's not a name
-  if (teamId && teamId !== 'team_unknown') {
-    plainText += `(Admin: https://admin.vercel.com/team/${teamId})`;
 
   try {
     const result = await client.chat.postMessage({
