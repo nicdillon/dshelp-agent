@@ -180,50 +180,61 @@ export const postTicketCreationMessage = async (details: TicketDetails) => {
   }
 
   // Build comprehensive plain text for Linear bot parsing
-  // Format it nicely for readability while including all details
-  let plainText = `${issueTitle}\n\n`;
+  // Format matches the working format that Linear's extraction functions expect
+  // Using Markdown formatting with ** for bold and proper line breaks
+  let plainText = `**Request Form** submission from ${customer}\n\n`;
 
-  plainText += `CUSTOMER INFORMATION\n`;
-  plainText += `• Customer: ${customer}\n`;
-  plainText += `• Customer Name: ${customerName}\n`;
+  // Customer with backticks - this format is specifically looked for by extractCustomerNameFromDescription
+  plainText += `**Customer**\n\`${customerName}\`\n\n`;
+
+  // Customer Segment
   if (customerSegment) {
-    plainText += `• Segment: ${customerSegment}\n`;
+    plainText += `**Customer Segment**\n${customerSegment}\n\n`;
+  }
+
+  // Team ID with Admin Link - this format helps with extraction
+  plainText += `**Team ID**\n${teamId}\n`;
+  if (teamId && teamId !== 'team_unknown') {
+    plainText += `[Admin Link](<https://admin.vercel.com/team/${teamId}>)\n`;
   }
   plainText += `\n`;
 
-  plainText += `IDENTIFIERS\n`;
-  plainText += `• Team ID: ${teamId}\n`;
-  if (projectId) {
-    plainText += `• Project ID: ${projectId}\n`;
-  }
+  // Notion Account Link
+  plainText += `**Notion Account Link**\n`;
   if (notionLink) {
-    plainText += `• Notion: ${notionLink}\n`;
+    plainText += `${notionLink}\n`;
   }
   plainText += `\n`;
 
-  plainText += `PRIORITY\n`;
-  plainText += `• ${priority || "🟡 SEV 3/Non-Urgent"}\n`;
+  // Project ID
+  plainText += `**Project ID**\n`;
+  if (projectId) {
+    plainText += `${projectId}\n`;
+  }
+  plainText += `\n`;
+
+  // Priority
+  plainText += `**Priority**\n${priority || "🟡 SEV 3/Non-Urgent"}\n\n`;
+
+  // Context on Elevated Priority
+  plainText += `**Context on Elevated Priority**\n`;
   if (elevatedPriorityContext) {
-    plainText += `• Context: ${elevatedPriorityContext}\n`;
+    plainText += `${elevatedPriorityContext}\n`;
   }
   plainText += `\n`;
 
-  plainText += `REQUEST\n`;
-  plainText += `${request}\n`;
-  plainText += `\n`;
+  // Request
+  plainText += `**Request**\n${request}\n\n`;
 
+  // Slack Thread Link
   if (slackThreadUrl) {
-    plainText += `SLACK THREAD\n`;
-    plainText += `${slackThreadUrl}\n`;
-    plainText += `\n`;
+    plainText += `**Slack Thread**\n${slackThreadUrl}\n\n`;
   }
 
+  // Internal tracking
   if (issueCategory) {
-    plainText += `---\n`;
-    plainText += `AI Classification: ${issueCategory}\n`;
+    plainText += `_AI Classification: ${issueCategory}_\n`;
   }
-
-  plainText += `✅ Pre-debugging steps considered by AI agent`;
 
   try {
     const result = await client.chat.postMessage({
