@@ -196,8 +196,8 @@ export const postTicketCreationMessage = async (details: TicketDetails) => {
   // The extraction function looks for text on the same line or adjacent lines
   plainText += `**Team ID**\n${teamId}\n`;
   if (teamId && teamId !== 'team_unknown') {
-    // Put admin link in markdown format like the working example
-    plainText += `[Admin Link](<https://admin.vercel.com/team/${teamId}>)\n`;
+    // Use Slack's mrkdwn link format: <URL|text>
+    plainText += `<https://admin.vercel.com/team/${teamId}|Admin Link>\n`;
   }
   plainText += `\n`;
 
