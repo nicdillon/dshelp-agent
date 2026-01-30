@@ -20,10 +20,12 @@ export const generateResponse = async (
   updateStatus?: (status: string) => void,
   slackThreadUrl?: string,
   channelHistory?: string,
+  enrichedContext?: string,
 ) => {
   console.log('[generateResponse] Starting response generation');
   console.log('[generateResponse] Messages:', JSON.stringify(messages, null, 2));
   console.log('[generateResponse] Has channel history:', !!channelHistory);
+  console.log('[generateResponse] Has enriched context:', !!enrichedContext);
 
   try {
     const systemPrompt = `You are an intake assistant for the Vercel Developer Success Engineering (DSE) team.
@@ -121,7 +123,7 @@ IMPORTANT: Before creating a ticket, if any required information (team ID, custo
 
 For CUSTOMER ISSUES that are IN-SCOPE (new or ongoing): After reviewing the customer issue and gathering context, ALWAYS create a DSE ticket automatically by using the createTicket tool. Do not ask for permission - just create it and confirm to the field team member that the ticket has been created. If DSE is already engaged, make sure the ticket summary reflects the current state of work (e.g., "DSE is actively investigating revalidatePath issue, created reproduction, coordinating with CDN/Next.js teams").
 
-For INFORMATIONAL questions about DSE: Do NOT create a ticket. These are field team members asking about DSE capabilities, not customer issues requiring DSE engagement. Simply provide a helpful answer.`;
+For INFORMATIONAL questions about DSE: Do NOT create a ticket. These are field team members asking about DSE capabilities, not customer issues requiring DSE engagement. Simply provide a helpful answer.${enrichedContext ? `\n\n${enrichedContext}` : ''}`;
 
     console.log('[generateResponse] System prompt length:', systemPrompt.length);
     console.log('[generateResponse] Number of messages:', messages.length);

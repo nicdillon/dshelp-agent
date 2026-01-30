@@ -179,10 +179,55 @@ export const postTicketCreationMessage = async (details: TicketDetails) => {
     });
   }
 
+  // Build comprehensive plain text for Linear bot parsing
+  let plainText = `${issueTitle}\n\n`;
+
+  plainText += `**Customer Information**\n`;
+  plainText += `Customer: ${customer}\n`;
+  plainText += `Customer Name: ${customerName}\n`;
+  if (customerSegment) {
+    plainText += `Customer Segment: ${customerSegment}\n`;
+  }
+  plainText += `\n`;
+
+  plainText += `**Identifiers**\n`;
+  plainText += `Team ID: ${teamId}\n`;
+  if (projectId) {
+    plainText += `Project ID: ${projectId}\n`;
+  }
+  if (notionLink) {
+    plainText += `Notion Link: ${notionLink}\n`;
+  }
+  plainText += `\n`;
+
+  plainText += `**Priority**\n`;
+  plainText += `${priority || "🟡 SEV 3/Non-Urgent"}\n`;
+  if (elevatedPriorityContext) {
+    plainText += `Context: ${elevatedPriorityContext}\n`;
+  }
+  plainText += `\n`;
+
+  plainText += `**Request**\n`;
+  plainText += `${request}\n`;
+  plainText += `\n`;
+
+  if (slackThreadUrl) {
+    plainText += `**Slack Thread**\n`;
+    plainText += `${slackThreadUrl}\n`;
+    plainText += `\n`;
+  }
+
+  if (issueCategory) {
+    plainText += `AI Classification: ${issueCategory}\n`;
+  }
+
+  plainText += `\n---\n`;
+  plainText += `✅ Pre-debugging steps have been considered by the AI agent`;
+
   try {
     const result = await client.chat.postMessage({
       channel: ticketChannelId,
-      text: `${issueTitle} - ${customerName}`,
+      text: plainText,
       blocks: blocks,
     });
 

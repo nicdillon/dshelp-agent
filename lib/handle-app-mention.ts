@@ -1,6 +1,6 @@
 // Slack event types
 type AppMentionEvent = any;
-import { client, getThread, getChannelHistory } from "./slack-utils";
+import { client, getThread, getChannelHistory, findRelevantThreads } from "./slack-utils";
 import { generateResponse } from "./generate-response";
 import { classifyRequest } from "./classify-request";
 import { generateRoutingResponse } from "./generate-routing-response";
@@ -72,9 +72,34 @@ export async function handleNewAppMention(
     const channelHistory = await getChannelHistory(channel, botUserId, 100);
     console.log('[handleNewAppMention] Channel history length:', channelHistory.length);
 
+    // Find relevant threads (only if not already in a thread)
+    let enrichedContext = '';
+    if (!thread_ts) {
+      console.log('[handleNewAppMention] Finding relevant threads in channel');
+      await updateMessage("is searching channel threads for context...");
+
+      const threadDiscovery = await findRelevantThreads(channel, event.text, botUserId);
+      console.log('[handleNewAppMention] Thread discovery summary:', threadDiscovery.summary);
+
+      if (threadDiscovery.relevantThreads.length > 0) {
+        // Format threads for context
+        enrichedContext = '\n\n## Relevant Thread Context:\n\n' +
+          threadDiscovery.relevantThreads.map(thread => {
+            return `**Thread about:** ${thread.relevanceReason}\n` +
+              `**Root message:** ${thread.rootMessage}\n` +
+              `**Thread replies:**\n${thread.threadMessages.join('\n')}`;
+          }).join('\n\n---\n\n');
+
+        console.log('[handleNewAppMention] Added', threadDiscovery.relevantThreads.length, 'threads to context');
+      }
+    } else {
+      console.log('[handleNewAppMention] Already in a thread, skipping thread discovery');
+    }
+
     // Classify the request to check if it's in DS scope
     console.log('[handleNewAppMention] Starting classification');
-    const classification = await classifyRequest(messages);
+    await updateMessage("is analyzing your request...");
+    const classification = await classifyRequest(messages, enrichedContext);
 
     console.log(`[handleNewAppMention] Classification result:`, JSON.stringify(classification));
 
@@ -98,7 +123,7 @@ export async function handleNewAppMention(
       const slackThreadUrl = `https://slack.com/app_redirect?channel=${channel}&thread_ts=${threadTs}`;
 
       console.log('[handleNewAppMention] Calling generateResponse');
-      result = await generateResponse(messages, updateMessage, slackThreadUrl, channelHistory);
+      result = await generateResponse(messages, updateMessage, slackThreadUrl, channelHistory, enrichedContext);
       console.log('[handleNewAppMention] generateResponse returned, result length:', result?.length || 0);
     }
 
