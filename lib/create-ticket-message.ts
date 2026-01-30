@@ -180,49 +180,50 @@ export const postTicketCreationMessage = async (details: TicketDetails) => {
   }
 
   // Build comprehensive plain text for Linear bot parsing
+  // Format it nicely for readability while including all details
   let plainText = `${issueTitle}\n\n`;
 
-  plainText += `**Customer Information**\n`;
-  plainText += `Customer: ${customer}\n`;
-  plainText += `Customer Name: ${customerName}\n`;
+  plainText += `CUSTOMER INFORMATION\n`;
+  plainText += `• Customer: ${customer}\n`;
+  plainText += `• Customer Name: ${customerName}\n`;
   if (customerSegment) {
-    plainText += `Customer Segment: ${customerSegment}\n`;
+    plainText += `• Segment: ${customerSegment}\n`;
   }
   plainText += `\n`;
 
-  plainText += `**Identifiers**\n`;
-  plainText += `Team ID: ${teamId}\n`;
+  plainText += `IDENTIFIERS\n`;
+  plainText += `• Team ID: ${teamId}\n`;
   if (projectId) {
-    plainText += `Project ID: ${projectId}\n`;
+    plainText += `• Project ID: ${projectId}\n`;
   }
   if (notionLink) {
-    plainText += `Notion Link: ${notionLink}\n`;
+    plainText += `• Notion: ${notionLink}\n`;
   }
   plainText += `\n`;
 
-  plainText += `**Priority**\n`;
-  plainText += `${priority || "🟡 SEV 3/Non-Urgent"}\n`;
+  plainText += `PRIORITY\n`;
+  plainText += `• ${priority || "🟡 SEV 3/Non-Urgent"}\n`;
   if (elevatedPriorityContext) {
-    plainText += `Context: ${elevatedPriorityContext}\n`;
+    plainText += `• Context: ${elevatedPriorityContext}\n`;
   }
   plainText += `\n`;
 
-  plainText += `**Request**\n`;
+  plainText += `REQUEST\n`;
   plainText += `${request}\n`;
   plainText += `\n`;
 
   if (slackThreadUrl) {
-    plainText += `**Slack Thread**\n`;
+    plainText += `SLACK THREAD\n`;
     plainText += `${slackThreadUrl}\n`;
     plainText += `\n`;
   }
 
   if (issueCategory) {
+    plainText += `---\n`;
     plainText += `AI Classification: ${issueCategory}\n`;
   }
 
-  plainText += `\n---\n`;
-  plainText += `✅ Pre-debugging steps have been considered by the AI agent`;
+  plainText += `✅ Pre-debugging steps considered by AI agent`;
 
   try {
     const result = await client.chat.postMessage({
