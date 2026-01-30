@@ -181,59 +181,78 @@ export const postTicketCreationMessage = async (details: TicketDetails) => {
 
   // Build comprehensive plain text for Linear bot parsing
   // Format matches the working format that Linear's extraction functions expect
-  // Using Markdown formatting with ** for bold and proper line breaks
-  let plainText = `**Request Form** submission from ${customer}\n\n`;
+  // Note: request parameter already includes Slack Thread if provided
+  let plainText = `**Request Form** submission from ${customer}
 
-  // Customer with backticks - this format is specifically looked for by extractCustomerNameFromDescription
-  plainText += `**Customer**\n\`${customerName}\`\n\n`;
+**Customer**
+\`${customerName}\`
+
+`;
 
   // Customer Segment
   if (customerSegment) {
-    plainText += `**Customer Segment**\n${customerSegment}\n\n`;
+    plainText += `**Customer Segment**
+${customerSegment}
+
+`;
   }
 
-  // Team ID with Admin Link - this format helps with extraction
-  plainText += `**Team ID**\n${teamId}\n`;
+  // Team ID with plain URL on next line (no markdown link to avoid Slack encoding issues)
+  plainText += `**Team ID**
+${teamId}
+`;
   if (teamId && teamId !== 'team_unknown') {
-    plainText += `[Admin Link](<https://admin.vercel.com/team/${teamId}>)\n`;
+    plainText += `https://admin.vercel.com/team/${teamId}
+`;
   }
-  plainText += `\n`;
+  plainText += `
+`;
 
   // Notion Account Link
-  plainText += `**Notion Account Link**\n`;
+  plainText += `**Notion Account Link**
+`;
   if (notionLink) {
-    plainText += `${notionLink}\n`;
+    plainText += `${notionLink}
+`;
   }
-  plainText += `\n`;
+  plainText += `
+`;
 
   // Project ID
-  plainText += `**Project ID**\n`;
+  plainText += `**Project ID**
+`;
   if (projectId) {
-    plainText += `${projectId}\n`;
+    plainText += `${projectId}
+`;
   }
-  plainText += `\n`;
+  plainText += `
+`;
 
   // Priority
-  plainText += `**Priority**\n${priority || "🟡 SEV 3/Non-Urgent"}\n\n`;
+  plainText += `**Priority**
+${priority || "🟡 SEV 3/Non-Urgent"}
+
+`;
 
   // Context on Elevated Priority
-  plainText += `**Context on Elevated Priority**\n`;
+  plainText += `**Context on Elevated Priority**
+`;
   if (elevatedPriorityContext) {
-    plainText += `${elevatedPriorityContext}\n`;
+    plainText += `${elevatedPriorityContext}
+`;
   }
-  plainText += `\n`;
+  plainText += `
+`;
 
-  // Request
-  plainText += `**Request**\n${request}\n\n`;
+  // Request (already includes Slack Thread if provided - see generate-response.ts line 229)
+  plainText += `**Request**
+${request}
 
-  // Slack Thread Link
-  if (slackThreadUrl) {
-    plainText += `**Slack Thread**\n${slackThreadUrl}\n\n`;
-  }
+`;
 
   // Internal tracking
   if (issueCategory) {
-    plainText += `_AI Classification: ${issueCategory}_\n`;
+    plainText += `_AI Classification: ${issueCategory}_`;
   }
 
   try {
