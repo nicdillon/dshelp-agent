@@ -180,52 +180,56 @@ export const postTicketCreationMessage = async (details: TicketDetails) => {
   }
 
   // Build comprehensive plain text for Linear bot parsing
-  // CRITICAL: Slack's Linear integration strips single newlines, converting them to spaces
-  // We'll try double newlines and see if that preserves paragraph breaks
-  let plainText = `**Request Form** submission from ${customer}\n\n`;
+  // CRITICAL: Slack's Linear integration strips ALL newlines to spaces
+  // Pattern 1 regex REQUIRES \n, so it fails when collapsed
+  // Solution: Use Pattern 5 format (Customer: Name) which works without newlines
 
-  // Customer with backticks - Pattern 1 in extractCustomerNameFromDescription
-  plainText += `**Customer**\n\n\`${customerName}\`\n\n`;
+  let plainText = `**Request Form** submission\n\n`;
+
+  // Use Pattern 5 format which works when collapsed: Customer: CustomerName
+  plainText += `Customer: ${customerName}\n\n`;
 
   // Customer Segment
   if (customerSegment) {
-    plainText += `**Customer Segment**\n\n${customerSegment}\n\n`;
+    plainText += `Segment: ${customerSegment}\n\n`;
   }
 
-  // Team ID - Keep this line CLEAN with NOTHING after team ID to avoid extraction issues
-  plainText += `**Team ID**\n\n${teamId}\n\n`;
-  if (teamId && teamId !== 'team_unknown') {
-    // Use plain URL to avoid encoding issues
-    plainText += `Admin Link: https://admin.vercel.com/team/${teamId}\n\n`;
-  }
+  // IMPORTANT: Put Team ID at the END to prevent Pattern 6 extraction
+  // Pattern 6 extracts text adjacent to team ID, so we isolate it
 
-  // Notion Account Link
-  plainText += `**Notion Account Link**\n\n`;
-  if (notionLink) {
-    plainText += `${notionLink}\n\n`;
-  }
-
-  // Project ID
-  plainText += `**Project ID**\n\n`;
-  if (projectId) {
-    plainText += `${projectId}\n\n`;
-  }
-
-  // Priority
-  plainText += `**Priority**\n\n${priority || "🟡 SEV 3/Non-Urgent"}\n\n`;
+  // Priority first (safe from extraction)
+  plainText += `Priority: ${priority || "🟡 SEV 3/Non-Urgent"}\n\n`;
 
   // Context on Elevated Priority
   if (elevatedPriorityContext) {
-    plainText += `**Context on Elevated Priority**\n\n${elevatedPriorityContext}\n\n`;
+    plainText += `Elevated Priority Context: ${elevatedPriorityContext}\n\n`;
   }
 
-  // Request (already includes Slack Thread if provided - see generate-response.ts line 229)
-  plainText += `**Request**\n\n${request}\n\n`;
+  // Notion Account Link (safe from extraction)
+  if (notionLink) {
+    plainText += `Notion: ${notionLink}\n\n`;
+  }
+
+  // Project ID (safe from extraction)
+  if (projectId) {
+    plainText += `Project: ${projectId}\n\n`;
+  }
+
+  // Request
+  plainText += `Request: ${request}\n\n`;
 
   // Internal tracking
   if (issueCategory) {
-    plainText += `_AI Classification: ${issueCategory}_`;
+    plainText += `AI Classification: ${issueCategory}\n\n`;
   }
+
+  // Team ID LAST with no adjacent text that could be extracted
+  plainText += `Team ID: ${teamId}\n\n`;
+
+  // Admin link on separate "line" (though it will collapse to same line)
+  // Using parentheses to make it clear it's not a name
+  if (teamId && teamId !== 'team_unknown') {
+    plainText += `(Admin: https://admin.vercel.com/team/${teamId})`;
 
   try {
     const result = await client.chat.postMessage({
