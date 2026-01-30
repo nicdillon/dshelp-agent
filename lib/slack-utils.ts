@@ -376,7 +376,7 @@ export async function findRelevantThreads(
     });
 
     // Wait for all threads with timeout
-    const timeoutPromise = new Promise<null[]>((resolve) => {
+    const timeoutPromise = new Promise<(RelevantThread | null)[]>((resolve) => {
       setTimeout(() => resolve(Array(relevantMessages.length).fill(null)), THREAD_FETCH_TIMEOUT_MS);
     });
 
@@ -385,7 +385,7 @@ export async function findRelevantThreads(
       timeoutPromise
     ]);
 
-    const relevantThreads = threadsOrTimeout.filter((thread): thread is RelevantThread => thread !== null);
+    const relevantThreads: RelevantThread[] = threadsOrTimeout.filter((thread): thread is RelevantThread => thread !== null);
 
     console.log('[findRelevantThreads] Successfully fetched', relevantThreads.length, 'threads');
 
