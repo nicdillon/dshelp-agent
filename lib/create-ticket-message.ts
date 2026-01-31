@@ -180,60 +180,63 @@ export const postTicketCreationMessage = async (details: TicketDetails) => {
   }
 
   // Build comprehensive plain text for Linear bot parsing
-  // CRITICAL: Slack's Linear integration strips ALL newlines to spaces
-  // This causes extraction patterns to fail or extract wrong text
-  // Solution: Use delimiters that survive when collapsed
+  // HYPOTHESIS TEST: Without blocks, text should be main content (not fallback)
+  // This should preserve newlines like regular user messages
 
-  let plainText = `**Request Form** submission • `;
+  let plainText = `🎫 *DS Support Ticket Ready for Linear*\n\n`;
+  plainText += `_✅ Pre-debugging steps have been considered by the AI agent_\n\n`;
+  plainText += `---\n\n`;
 
-  // Use backticks to delimit customer name - clear boundary even when collapsed
-  plainText += `Customer: \`${customerName}\` • `;
+  // Use Pattern 1 format - should work if newlines are preserved
+  plainText += `*Customer*\n\`${customerName}\`\n\n`;
 
-  // Customer Segment with bullet separator
+  // Customer Segment
   if (customerSegment) {
-    plainText += `Segment: ${customerSegment} • `;
+    plainText += `*Customer Segment*\n${customerSegment}\n\n`;
   }
 
-  // Put non-extractable fields next
-  // Priority (safe - not a name)
-  plainText += `Priority: ${priority || "🟡 SEV 3/Non-Urgent"} • `;
+  // Team ID with admin link
+  plainText += `*Team ID*\n${teamId}\n`;
+  if (teamId && teamId !== 'team_unknown') {
+    plainText += `Admin: https://admin.vercel.com/team/${teamId}\n`;
+  }
+  plainText += `\n`;
+
+  // Notion Account Link
+  if (notionLink) {
+    plainText += `*Notion Account Link*\n${notionLink}\n\n`;
+  }
+
+  // Project ID
+  if (projectId) {
+    plainText += `*Project ID*\n${projectId}\n\n`;
+  }
+
+  // Priority
+  plainText += `*Priority*\n${priority || "🟡 SEV 3/Non-Urgent"}\n\n`;
 
   // Context on Elevated Priority
   if (elevatedPriorityContext) {
-    plainText += `Elevated Context: ${elevatedPriorityContext} • `;
+    plainText += `*Context on Elevated Priority*\n${elevatedPriorityContext}\n\n`;
   }
 
-  // Notion Account Link (URLs are filtered out by validation)
-  if (notionLink) {
-    plainText += `Notion: ${notionLink} • `;
-  }
-
-  // Project ID (starts with prj_ so filtered out)
-  if (projectId) {
-    plainText += `Project: ${projectId} • `;
-  }
-
-  // Team ID with brackets to prevent extraction
-  plainText += `[Team: ${teamId}] • `;
-
-  // Admin link with clear URL marker
-  if (teamId && teamId !== 'team_unknown') {
-    plainText += `URL: https://admin.vercel.com/team/${teamId} • `;
-  }
-
-  // Request at the end
-  plainText += `\n\n**Request:** ${request}`;
+  // Request
+  plainText += `*Request*\n${request}\n\n`;
 
   // Internal tracking
   if (issueCategory) {
-    plainText += `\n\n_AI Classification: ${issueCategory}_`;
+    plainText += `---\n_AI Classification: ${issueCategory}_`;
   }
 
   try {
+    // HYPOTHESIS TEST: Send without blocks to preserve formatting
+    // When blocks are present, text becomes a fallback for notifications
+    // Without blocks, text should be treated as main content (like user messages)
     const result = await client.chat.postMessage({
       channel: ticketChannelId,
       text: plainText,
-      blocks: blocks,
+      // blocks: blocks,  // REMOVED: Testing if this preserves formatting
+      mrkdwn: true,       // Enable markdown formatting for the text
     });
 
     return {
