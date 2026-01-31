@@ -180,58 +180,63 @@ export const postTicketCreationMessage = async (details: TicketDetails) => {
   }
 
   // Build comprehensive plain text for Linear bot parsing
-  // CRITICAL: Slack's Linear integration strips single newlines, converting them to spaces
-  // We'll try double newlines and see if that preserves paragraph breaks
-  let plainText = `**Request Form** submission from ${customer}\n\n`;
+  // HYPOTHESIS TEST: Without blocks, text should be main content (not fallback)
+  // This should preserve newlines like regular user messages
 
-  // Customer with backticks - Pattern 1 in extractCustomerNameFromDescription
-  plainText += `**Customer**\n\n\`${customerName}\`\n\n`;
+  let plainText = `🎫 *DS Support Ticket Ready for Linear*\n\n`;
+  plainText += `_✅ Pre-debugging steps have been considered by the AI agent_\n\n`;
+  plainText += `---\n\n`;
+
+  // Use Pattern 1 format - should work if newlines are preserved
+  plainText += `*Customer*\n\`${customerName}\`\n\n`;
 
   // Customer Segment
   if (customerSegment) {
-    plainText += `**Customer Segment**\n\n${customerSegment}\n\n`;
+    plainText += `*Customer Segment*\n${customerSegment}\n\n`;
   }
 
-  // Team ID - Keep this line CLEAN with NOTHING after team ID to avoid extraction issues
-  plainText += `**Team ID**\n\n${teamId}\n\n`;
+  // Team ID with admin link
+  plainText += `*Team ID*\n${teamId}\n`;
   if (teamId && teamId !== 'team_unknown') {
-    // Use plain URL to avoid encoding issues
-    plainText += `Admin Link: https://admin.vercel.com/team/${teamId}\n\n`;
+    plainText += `Admin: https://admin.vercel.com/team/${teamId}\n`;
   }
+  plainText += `\n`;
 
   // Notion Account Link
-  plainText += `**Notion Account Link**\n\n`;
   if (notionLink) {
-    plainText += `${notionLink}\n\n`;
+    plainText += `*Notion Account Link*\n${notionLink}\n\n`;
   }
 
   // Project ID
-  plainText += `**Project ID**\n\n`;
   if (projectId) {
-    plainText += `${projectId}\n\n`;
+    plainText += `*Project ID*\n${projectId}\n\n`;
   }
 
   // Priority
-  plainText += `**Priority**\n\n${priority || "🟡 SEV 3/Non-Urgent"}\n\n`;
+  plainText += `*Priority*\n${priority || "🟡 SEV 3/Non-Urgent"}\n\n`;
 
   // Context on Elevated Priority
   if (elevatedPriorityContext) {
-    plainText += `**Context on Elevated Priority**\n\n${elevatedPriorityContext}\n\n`;
+    plainText += `*Context on Elevated Priority*\n${elevatedPriorityContext}\n\n`;
   }
 
-  // Request (already includes Slack Thread if provided - see generate-response.ts line 229)
-  plainText += `**Request**\n\n${request}\n\n`;
+  // Request
+  plainText += `*Request*\n${request}\n\n`;
 
   // Internal tracking
   if (issueCategory) {
-    plainText += `_AI Classification: ${issueCategory}_`;
+    plainText += `---\n_AI Classification: ${issueCategory}_`;
   }
 
   try {
+    // HYPOTHESIS TEST: Send without blocks to preserve formatting
+    // When blocks are present, text becomes a fallback for notifications
+    // Without blocks, text should be treated as main content (like user messages)
     const result = await client.chat.postMessage({
       channel: ticketChannelId,
       text: plainText,
-      blocks: blocks,
+      // blocks: blocks,  // REMOVED: Testing if this preserves formatting
+      mrkdwn: true,       // Enable markdown formatting for the text
     });
 
     return {
